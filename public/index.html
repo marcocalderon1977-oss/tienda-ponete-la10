@@ -2,6 +2,10 @@
 <html lang="es"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="ponete-la10-version" content="global-mobile-2026-05-07-01">
 <title>PONETE LA 10 | Tienda Deportiva</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800;900&amp;display=swap" rel="stylesheet">
 <style>
@@ -4018,6 +4022,182 @@ document.addEventListener('DOMContentLoaded', () => {
   }else{
     cargarNube();
   }
+})();
+</script>
+
+
+
+<script>
+/* ===== FIX GLOBAL DEFINITIVO CELULAR - PONETE LA 10 =====
+   Objetivo:
+   1) Cargar catálogos siempre frescos desde Vercel KV.
+   2) Evitar que el celular use datos viejos del navegador.
+   3) Abrir catálogos en móvil aunque el navegador bloquee window.open().
+   4) Convertir botones del menú en enlaces reales antes del toque.
+*/
+(function(){
+  if(window.__PL10_GLOBAL_MOBILE_FIX_20260507__) return;
+  window.__PL10_GLOBAL_MOBILE_FIX_20260507__ = true;
+
+  const VERSION = '2026-05-07-global-mobile-01';
+  const STORAGE_KEYS = [
+    'ponete10_catalogos_links_v3',
+    'linksPro',
+    'trackingRegistros'
+  ];
+
+  const realOpen = window.open ? window.open.bind(window) : null;
+  const isMobile = () => /Android|iPhone|iPad|iPod|Mobile|SamsungBrowser|CriOS|FxiOS/i.test(navigator.userAgent) || window.innerWidth <= 768;
+
+  function normalizarURL(url){
+    url = String(url || '').trim();
+    if(url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
+    return url;
+  }
+
+  function leerLocal(key, fallback){
+    try{ return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); }
+    catch(e){ return fallback; }
+  }
+
+  function escribirLocal(key, value){
+    try{ localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value)); }catch(e){}
+  }
+
+  function listaCategoria(cat){
+    const obj = leerLocal('ponete10_catalogos_links_v3', {});
+    const viejo = leerLocal('linksPro', []);
+    let items = [];
+    if(obj && Array.isArray(obj[cat])) items = items.concat(obj[cat]);
+    if(Array.isArray(viejo)) items = items.concat(viejo.filter(x => x && x.categoria === cat));
+    return items.filter(x => x && normalizarURL(x.url || x.link || x.href));
+  }
+
+  function primerURL(cat){
+    const items = listaCategoria(cat);
+    if(!items.length) return '';
+    return normalizarURL(items[0].url || items[0].link || items[0].href);
+  }
+
+  function cerrarMenu(){
+    const nav = document.getElementById('mainNav');
+    if(!nav) return;
+    nav.classList.remove('nav-open');
+    nav.querySelectorAll('.menu').forEach(m => m.classList.remove('menu-open'));
+  }
+
+  function refrescarEnlacesCatalogos(){
+    document.querySelectorAll('[data-categoria], [data-cat-link]').forEach(a => {
+      const cat = a.getAttribute('data-categoria') || a.getAttribute('data-cat-link');
+      if(!cat) return;
+      const url = primerURL(cat);
+      if(url){
+        a.setAttribute('href', url);
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'noopener noreferrer');
+        a.dataset.pl10UrlReal = url;
+      }
+    });
+
+    document.querySelectorAll('.catalogo-pro-card a, a[href]').forEach(a => {
+      const href = normalizarURL(a.getAttribute('href'));
+      if(href && /^https?:\/\//i.test(href)){
+        a.setAttribute('href', href);
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'noopener noreferrer');
+      }
+    });
+  }
+
+  // En móvil, si cualquier script viejo llama window.open, abrimos en la misma pestaña.
+  // Esto evita bloqueo de popups y asegura que el catálogo abra en celulares.
+  window.open = function(url, nombre, opciones){
+    const limpio = normalizarURL(url);
+    if(!limpio) return null;
+    if(isMobile()){
+      window.location.href = limpio;
+      return { focus:function(){}, closed:false };
+    }
+    return realOpen ? realOpen(limpio, '_blank', opciones || 'noopener,noreferrer') : null;
+  };
+
+  // Captura el toque antes de scripts viejos: en móvil abre el link real en la misma pestaña.
+  document.addEventListener('click', function(e){
+    const a = e.target.closest('[data-categoria], [data-cat-link], .catalogo-pro-card a');
+    if(!a) return;
+
+    let url = normalizarURL(a.dataset.pl10UrlReal || a.getAttribute('href'));
+    const cat = a.getAttribute('data-categoria') || a.getAttribute('data-cat-link');
+    if((!url || url === '#') && cat) url = primerURL(cat);
+
+    if(url && /^https?:\/\//i.test(url)){
+      refrescarEnlacesCatalogos();
+      cerrarMenu();
+      if(isMobile()){
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        window.location.href = url;
+      }
+    }
+  }, true);
+
+  async function cargarClaveNube(key){
+    try{
+      const res = await fetch('/api/store?key=' + encodeURIComponent(key) + '&t=' + Date.now(), {
+        method:'GET',
+        cache:'no-store',
+        headers:{ 'Cache-Control':'no-cache' }
+      });
+      if(!res.ok) return false;
+      const json = await res.json();
+      if(json && json.exists && typeof json.value === 'string'){
+        localStorage.setItem(key, json.value);
+        return true;
+      }
+    }catch(e){ console.warn('No se pudo cargar global:', key, e); }
+    return false;
+  }
+
+  async function cargarDatosGlobales(){
+    let cambio = false;
+    for(const key of STORAGE_KEYS){
+      const ok = await cargarClaveNube(key);
+      if(ok) cambio = true;
+    }
+    refrescarEnlacesCatalogos();
+    try{ if(typeof window.renderCatalogosPro === 'function') window.renderCatalogosPro(); }catch(e){}
+    try{ if(typeof window.renderMenuLinks === 'function') window.renderMenuLinks(); }catch(e){}
+    try{ if(typeof window.renderTracking === 'function') window.renderTracking(); }catch(e){}
+    document.documentElement.setAttribute('data-pl10-version', VERSION);
+  }
+
+  // Limpieza controlada: no borra catálogos actuales, solo marca versión y fuerza recarga global.
+  try{
+    if(localStorage.getItem('pl10_mobile_fix_version') !== VERSION){
+      localStorage.setItem('pl10_mobile_fix_version', VERSION);
+    }
+  }catch(e){}
+
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister())).catch(()=>{});
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){
+      refrescarEnlacesCatalogos();
+      cargarDatosGlobales();
+      setTimeout(refrescarEnlacesCatalogos, 800);
+      setTimeout(cargarDatosGlobales, 1600);
+    });
+  }else{
+    refrescarEnlacesCatalogos();
+    cargarDatosGlobales();
+    setTimeout(refrescarEnlacesCatalogos, 800);
+    setTimeout(cargarDatosGlobales, 1600);
+  }
+
+  window.pl10RefrescarGlobal = cargarDatosGlobales;
 })();
 </script>
 
