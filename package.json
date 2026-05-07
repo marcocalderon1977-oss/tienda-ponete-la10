@@ -1,9 +1,0 @@
-{
-  "name": "ponete-la10-vercel-db",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "dependencies": {
-    "@vercel/kv": "latest"
-  }
-}
