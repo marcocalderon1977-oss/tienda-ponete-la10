@@ -5,7 +5,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ponete-la10-version" content="kv-global-definitivo-2026-05-09">
+<meta name="ponete-la10-version" content="global-real-final-2026-05-09-01">
 <title>PONETE LA 10 | Tienda Deportiva</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800;900&amp;display=swap" rel="stylesheet">
 <style>
@@ -2609,131 +2609,6 @@ textarea,
 }
 </style>
 
-
-<script>
-/* ===== PONETE LA 10: GLOBAL DEFINITIVO KV + CELULAR =====
-   Este bloque va temprano para que cualquier guardado del administrador
-   se sincronice en Vercel KV, no solo en el navegador del celular.
-*/
-(function(){
-  if(window.__PL10_KV_GLOBAL_DEFINITIVO_20260509__) return;
-  window.__PL10_KV_GLOBAL_DEFINITIVO_20260509__ = true;
-
-  const PREFIX_VERSION = '2026-05-09-kv-global-definitivo';
-  const SKIP_KEYS = new Set(['pl10_mobile_fix_version']);
-  const originalSetItem = localStorage.setItem.bind(localStorage);
-  const originalGetItem = localStorage.getItem.bind(localStorage);
-  const originalRemoveItem = localStorage.removeItem.bind(localStorage);
-  let cargandoNube = false;
-
-  function esClaveValida(key){
-    key = String(key || '').trim();
-    if(!key || SKIP_KEYS.has(key)) return false;
-    if(key.length > 90) return false;
-    return /^[A-Za-z0-9_\-:.]+$/.test(key);
-  }
-
-  async function subirKey(key, value){
-    if(!esClaveValida(key)) return;
-    try{
-      await fetch('/api/store', {
-        method:'POST',
-        cache:'no-store',
-        headers:{
-          'Content-Type':'application/json',
-          'Cache-Control':'no-cache'
-        },
-        body:JSON.stringify({ key:String(key), value:String(value ?? '') })
-      });
-    }catch(e){
-      console.warn('KV: no se pudo guardar', key, e);
-    }
-  }
-
-  async function borrarKey(key){
-    if(!esClaveValida(key)) return;
-    try{
-      await fetch('/api/store?key=' + encodeURIComponent(key), {
-        method:'DELETE',
-        cache:'no-store',
-        headers:{'Cache-Control':'no-cache'}
-      });
-    }catch(e){
-      console.warn('KV: no se pudo borrar', key, e);
-    }
-  }
-
-  localStorage.setItem = function(key, value){
-    originalSetItem(key, value);
-    if(!cargandoNube) subirKey(key, value);
-  };
-
-  localStorage.removeItem = function(key){
-    originalRemoveItem(key);
-    if(!cargandoNube) borrarKey(key);
-  };
-
-  function repintarTodo(){
-    const fns = [
-      'renderTracking',
-      'renderCatalogosPro',
-      'renderMenuLinks',
-      'pintarLinks',
-      'renderEntrega',
-      'renderNoticias',
-      'renderPromo',
-      'renderTop',
-      'renderNuevas',
-      'cargarDatosGlobales',
-      'refrescarEnlacesCatalogos'
-    ];
-    fns.forEach(fn=>{
-      try{ if(typeof window[fn] === 'function') window[fn](); }catch(e){}
-    });
-    try{
-      const btnVer = document.getElementById('btnVerLinksCategoria');
-      if(btnVer && document.getElementById('listaBorrarCategoria')) btnVer.click();
-    }catch(e){}
-    window.dispatchEvent(new CustomEvent('pl10-kv-global-cargado'));
-  }
-
-  async function cargarTodoDeKV(){
-    try{
-      cargandoNube = true;
-      const res = await fetch('/api/store?all=1&t=' + Date.now(), {
-        cache:'no-store',
-        headers:{'Cache-Control':'no-cache'}
-      });
-      if(res.ok){
-        const json = await res.json();
-        const data = json && json.data ? json.data : {};
-        Object.keys(data).forEach(key=>{
-          if(esClaveValida(key) && typeof data[key] === 'string'){
-            originalSetItem(key, data[key]);
-          }
-        });
-      }
-    }catch(e){
-      console.warn('KV: no se pudo cargar todo', e);
-    }finally{
-      cargandoNube = false;
-      try{ originalSetItem('pl10_mobile_fix_version', PREFIX_VERSION); }catch(e){}
-      repintarTodo();
-      setTimeout(repintarTodo, 700);
-      setTimeout(repintarTodo, 1800);
-    }
-  }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', cargarTodoDeKV);
-  }else{
-    cargarTodoDeKV();
-  }
-
-  window.pl10CargarKVGlobal = cargarTodoDeKV;
-})();
-</script>
-
 </head>
 <body data-menu-final-outside="1" data-fix-outside-final="1">
 <div class="bg-escudos champions-bg">
@@ -4592,6 +4467,138 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(()=>cargarCatalogosGlobales().then(pintarCatalogosGlobales), 3500);
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar();
+})();
+</script>
+
+
+
+<script>
+/* ===== PONETE LA 10 - SINCRONIZACIÓN GLOBAL REAL FINAL =====
+   Este bloque soluciona el problema del celular: guarda una copia completa
+   del localStorage en Vercel KV y la carga siempre fresca en todos los dispositivos.
+*/
+(function(){
+  if(window.__PL10_GLOBAL_REAL_FINAL_20260509__) return;
+  window.__PL10_GLOBAL_REAL_FINAL_20260509__ = true;
+
+  const MASTER_KEY = 'pl10_all_localstorage';
+  const VERSION = 'global-real-final-2026-05-09-01';
+  const originalSetItem = localStorage.setItem.bind(localStorage);
+  const originalRemoveItem = localStorage.removeItem.bind(localStorage);
+  const originalClear = localStorage.clear.bind(localStorage);
+  let cargandoNube = false;
+  let syncActivo = false;
+  let timer = null;
+
+  function debeGuardar(k){
+    k = String(k || '');
+    if(!k) return false;
+    if(k === MASTER_KEY) return false;
+    if(k.startsWith('pl10_')) return true;
+    if(k.includes('ponete')) return true;
+    if(k.includes('tracking')) return true;
+    if(k.includes('links')) return true;
+    if(k.includes('catalog')) return true;
+    if(k.includes('promo')) return true;
+    if(k.includes('noticia')) return true;
+    if(k.includes('top')) return true;
+    if(k.includes('entrega')) return true;
+    if(k.includes('nueva')) return true;
+    if(k.includes('stats')) return true;
+    return ['ponete10_catalogos_links_v3','linksPro','trackingRegistros'].includes(k);
+  }
+
+  function snapshot(){
+    const obj = {};
+    try{
+      for(let i=0;i<localStorage.length;i++){
+        const k = localStorage.key(i);
+        if(debeGuardar(k)) obj[k] = localStorage.getItem(k);
+      }
+    }catch(e){}
+    obj.__version = VERSION;
+    obj.__updated = new Date().toISOString();
+    return obj;
+  }
+
+  async function apiStore(method, key, value){
+    const url = '/api/store?key=' + encodeURIComponent(key) + '&t=' + Date.now();
+    const opt = { method, cache:'no-store', headers:{ 'Cache-Control':'no-cache' } };
+    if(method === 'POST'){
+      opt.headers['Content-Type'] = 'application/json';
+      opt.body = JSON.stringify({ key, value });
+    }
+    const res = await fetch(method === 'POST' ? '/api/store?t=' + Date.now() : url, opt);
+    if(!res.ok) throw new Error('KV HTTP ' + res.status);
+    return await res.json();
+  }
+
+  async function subirTodo(){
+    if(!syncActivo || cargandoNube) return;
+    clearTimeout(timer);
+    timer = setTimeout(async function(){
+      try{
+        await apiStore('POST', MASTER_KEY, JSON.stringify(snapshot()));
+      }catch(e){ console.warn('No se pudo guardar global:', e); }
+    }, 350);
+  }
+
+  function repintar(){
+    try{ if(typeof window.renderTracking === 'function') window.renderTracking(); }catch(e){}
+    try{ if(typeof window.renderCatalogosPro === 'function') window.renderCatalogosPro(); }catch(e){}
+    try{ if(typeof window.renderMenuLinks === 'function') window.renderMenuLinks(); }catch(e){}
+    try{ if(typeof window.pl10RefrescarGlobal === 'function') window.pl10RefrescarGlobal(); }catch(e){}
+    try{ if(typeof window.refrescarEnlacesCatalogos === 'function') window.refrescarEnlacesCatalogos(); }catch(e){}
+    document.documentElement.setAttribute('data-pl10-global-real', VERSION);
+  }
+
+  async function cargarTodo(){
+    cargandoNube = true;
+    try{
+      const json = await apiStore('GET', MASTER_KEY);
+      if(json && json.exists && typeof json.value === 'string'){
+        const data = JSON.parse(json.value || '{}');
+        Object.keys(data).forEach(function(k){
+          if(k.startsWith('__')) return;
+          if(debeGuardar(k) && typeof data[k] === 'string') originalSetItem(k, data[k]);
+        });
+        originalSetItem('pl10_mobile_fix_version', VERSION);
+      }else{
+        await apiStore('POST', MASTER_KEY, JSON.stringify(snapshot()));
+      }
+    }catch(e){ console.warn('No se pudo cargar global:', e); }
+    cargandoNube = false;
+    syncActivo = true;
+    repintar();
+  }
+
+  localStorage.setItem = function(key, value){
+    originalSetItem(key, value);
+    if(debeGuardar(key)) subirTodo();
+  };
+  localStorage.removeItem = function(key){
+    originalRemoveItem(key);
+    if(debeGuardar(key)) subirTodo();
+  };
+  localStorage.clear = function(){
+    originalClear();
+    subirTodo();
+  };
+
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister())).catch(()=>{});
+  }
+
+  if(location.search.includes('resetlocal=1')){
+    try{ originalClear(); }catch(e){}
+  }
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', cargarTodo);
+  else cargarTodo();
+
+  setInterval(function(){ if(!document.hidden) cargarTodo(); }, 12000);
+  window.pl10GuardarGlobalAhora = subirTodo;
+  window.pl10CargarGlobalAhora = cargarTodo;
 })();
 </script>
 

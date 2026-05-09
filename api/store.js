@@ -2,48 +2,26 @@ import { kv } from '@vercel/kv';
 
 const PREFIX = 'ponete-la10:';
 
-// Seguridad básica: solo claves simples del sitio, sin espacios ni símbolos raros.
-function cleanKey(key){
+function safeKey(key){
   key = String(key || '').trim();
   if(!key) return null;
-  if(key.length > 90) return null;
-  if(!/^[A-Za-z0-9_\-:.]+$/.test(key)) return null;
-  return key;
+  if(key.length > 120) return null;
+  if(key === '__proto__' || key === 'prototype' || key === 'constructor') return null;
+  if(!/^[a-zA-Z0-9:_\-.]+$/.test(key)) return null;
+  return PREFIX + key;
 }
 
-function safeKey(key){
-  const clean = cleanKey(key);
-  if(!clean) return null;
-  return PREFIX + clean;
-}
-
-function publicKey(fullKey){
-  return String(fullKey || '').startsWith(PREFIX)
-    ? String(fullKey).slice(PREFIX.length)
-    : String(fullKey || '');
+function noCache(res){
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
 }
 
 export default async function handler(req, res){
+  noCache(res);
   try{
-    res.setHeader('Cache-Control','no-store, no-cache, must-revalidate');
-    res.setHeader('Pragma','no-cache');
-    res.setHeader('Expires','0');
-
-    // GET /api/store?all=1  -> trae todos los datos del sitio para celular/computadora
-    if(req.method === 'GET' && String(req.query.all || '') === '1'){
-      const keys = await kv.keys(`${PREFIX}*`);
-      const data = {};
-      for(const full of keys || []){
-        const k = publicKey(full);
-        const value = await kv.get(full);
-        if(typeof value === 'string') data[k] = value;
-        else if(value !== null && value !== undefined) data[k] = JSON.stringify(value);
-      }
-      return res.status(200).json({ ok:true, data });
-    }
-
     const key = safeKey(req.query.key || req.body?.key);
-    if(!key) return res.status(400).json({ error:'Clave inválida' });
+    if(!key) return res.status(400).json({ error:'Clave no permitida' });
 
     if(req.method === 'GET'){
       const value = await kv.get(key);
