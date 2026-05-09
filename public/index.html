@@ -1,5 +1,191 @@
 <!DOCTYPE html>
 <html lang="es"><head>
+
+<script>
+/* ===== PONETE LA 10 - FIX CELULAR GLOBAL REAL 2026-05-09 =====
+   Este script se carga ANTES que los scripts viejos.
+   Fuerza que los catálogos se lean desde /api/catalogos y no desde datos viejos del celular.
+*/
+(function(){
+  if(window.__PL10_CELULAR_KV_FIX_REAL__) return;
+  window.__PL10_CELULAR_KV_FIX_REAL__ = true;
+
+  const CAT_KEY = 'ponete10_catalogos_links_v3';
+  const OLD_KEY = 'linksPro';
+
+  function tieneReset(){
+    return /(?:\?|&)resetlocal=1(?:&|$)/.test(location.search) ||
+           /(?:\?|&)reset=1(?:&|$)/.test(location.search);
+  }
+
+  function safeJSON(x, fallback){
+    try{ return JSON.parse(x); }catch(e){ return fallback; }
+  }
+
+  function normalizarURL(url){
+    url = String(url || '').trim();
+    if(url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
+    return url;
+  }
+
+  function guardarLocalCatalogos(data){
+    try{
+      const obj = data && typeof data === 'object' ? data : {};
+      localStorage.setItem(CAT_KEY, JSON.stringify(obj));
+      /* linksPro queda vacío para que no mezcle datos viejos del celular */
+      localStorage.setItem(OLD_KEY, JSON.stringify([]));
+    }catch(e){}
+  }
+
+  async function cargarCatalogosKV(){
+    try{
+      const res = await fetch('/api/catalogos?t=' + Date.now(), {
+        method:'GET',
+        cache:'no-store',
+        headers:{'Cache-Control':'no-cache'}
+      });
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      guardarLocalCatalogos(data || {});
+      repintarTodo();
+      return data || {};
+    }catch(e){
+      console.warn('No se pudo cargar /api/catalogos', e);
+      return null;
+    }
+  }
+
+  function listaCategoria(cat){
+    const obj = safeJSON(localStorage.getItem(CAT_KEY) || '{}', {});
+    const arr = Array.isArray(obj && obj[cat]) ? obj[cat] : [];
+    return arr.filter(x => x && normalizarURL(x.url || x.link || x.href));
+  }
+
+  function primerURL(cat){
+    const item = listaCategoria(cat)[0];
+    return item ? normalizarURL(item.url || item.link || item.href) : '';
+  }
+
+  function repintarTodo(){
+    try{ if(typeof window.renderCatalogosPro === 'function') window.renderCatalogosPro(); }catch(e){}
+    try{ if(typeof window.renderMenuLinks === 'function') window.renderMenuLinks(); }catch(e){}
+    try{ if(typeof window.refrescarEnlacesCatalogos === 'function') window.refrescarEnlacesCatalogos(); }catch(e){}
+
+    document.querySelectorAll('[data-categoria],[data-cat-link]').forEach(a=>{
+      const cat = a.getAttribute('data-categoria') || a.getAttribute('data-cat-link');
+      const url = cat ? primerURL(cat) : '';
+      if(url){
+        a.setAttribute('href', url);
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'noopener noreferrer');
+        a.dataset.pl10UrlReal = url;
+      }
+    });
+  }
+
+  async function apiPost(url, body){
+    const res = await fetch(url, {
+      method:'POST',
+      cache:'no-store',
+      headers:{'Content-Type':'application/json','Cache-Control':'no-cache'},
+      body:JSON.stringify(body || {})
+    });
+    const txt = await res.text();
+    let data = {};
+    try{ data = txt ? JSON.parse(txt) : {}; }catch(e){ data = {raw:txt}; }
+    if(!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+    return data;
+  }
+
+  async function guardarCatalogoDesdeFormulario(e){
+    const categoriaEl = document.getElementById('linkProCategoria') ||
+                        document.getElementById('categoriaCatalogo') ||
+                        document.getElementById('catalogoCategoria');
+    const tituloEl = document.getElementById('linkProTitulo') ||
+                     document.getElementById('tituloCatalogo') ||
+                     document.getElementById('catalogoTitulo');
+    const urlEl = document.getElementById('linkProURL') ||
+                  document.getElementById('urlCatalogo') ||
+                  document.getElementById('catalogoUrl') ||
+                  document.getElementById('linkCatalogo');
+
+    if(!categoriaEl || !urlEl) return false;
+
+    if(e){
+      e.preventDefault();
+      e.stopPropagation();
+      if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+    }
+
+    const categoria = String(categoriaEl.value || '').trim();
+    const titulo = String((tituloEl && tituloEl.value) || categoria || 'Catálogo').trim();
+    const url = normalizarURL(urlEl.value);
+
+    if(!categoria){ alert('Seleccione una categoría.'); return true; }
+    if(!/^https?:\/\//i.test(url)){ alert('Pegue un link válido.'); return true; }
+
+    try{
+      const r = await apiPost('/api/guardar', {categoria, titulo, url});
+      guardarLocalCatalogos(r.data || {});
+      if(urlEl) urlEl.value = '';
+      if(tituloEl) tituloEl.value = '';
+      repintarTodo();
+      setTimeout(cargarCatalogosKV, 400);
+      setTimeout(cargarCatalogosKV, 1500);
+      alert('Catálogo guardado globalmente. Debe aparecer en celular y computadora.');
+    }catch(err){
+      alert('Error guardando global: ' + err.message);
+    }
+    return true;
+  }
+
+  function conectarBotones(){
+    const ids = ['btnGuardarLinkPro','btnGuardarCatalogo','guardarCatalogo','btnSubirLink'];
+    ids.forEach(id=>{
+      const b = document.getElementById(id);
+      if(b) b.onclick = guardarCatalogoDesdeFormulario;
+    });
+
+    document.addEventListener('click', function(e){
+      const btn = e.target && e.target.closest && e.target.closest('#btnGuardarLinkPro,#btnGuardarCatalogo,#guardarCatalogo,#btnSubirLink');
+      if(btn) guardarCatalogoDesdeFormulario(e);
+    }, true);
+
+    document.addEventListener('submit', function(e){
+      const f = e.target;
+      if(f && f.querySelector && f.querySelector('#linkProURL,#urlCatalogo,#catalogoUrl,#linkCatalogo')){
+        guardarCatalogoDesdeFormulario(e);
+      }
+    }, true);
+  }
+
+  /* Limpieza inmediata ANTES de scripts viejos si viene resetlocal=1 */
+  try{
+    if(tieneReset()){
+      localStorage.removeItem(OLD_KEY);
+      localStorage.removeItem('pl10_mobile_fix_version');
+      localStorage.removeItem('pl10_cache_version');
+    }
+  }catch(e){}
+
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.getRegistrations().then(regs=>regs.forEach(r=>r.unregister())).catch(()=>{});
+  }
+
+  window.pl10CargarCatalogosKV = cargarCatalogosKV;
+  window.pl10GuardarCatalogoKV = guardarCatalogoDesdeFormulario;
+
+  document.addEventListener('DOMContentLoaded', function(){
+    conectarBotones();
+    cargarCatalogosKV();
+    setTimeout(conectarBotones, 800);
+    setTimeout(cargarCatalogosKV, 1000);
+    setTimeout(cargarCatalogosKV, 2500);
+    setTimeout(cargarCatalogosKV, 5000);
+  });
+})();
+</script>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -4472,158 +4658,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 <script>
-/* ===== FIX FINAL REAL: GUARDAR CATÁLOGOS SOLO EN VERCEL KV =====
-   Corrige el problema donde el link aparece y se borra segundos después.
-   Causa: funciones viejas guardaban primero en localStorage y luego la nube sobrescribía.
-*/
-(function(){
-  if(window.__PL10_KV_GUARDAR_CATALOGOS_FINAL_20260509__) return;
-  window.__PL10_KV_GUARDAR_CATALOGOS_FINAL_20260509__ = true;
-
-  const STORAGE_KEY = 'ponete10_catalogos_links_v3';
-
-  function $(id){ return document.getElementById(id); }
-
-  function normalizarURL(url){
-    url = String(url || '').trim();
-    if(url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
-    return url;
-  }
-
-  async function apiJSON(url, opciones){
-    const res = await fetch(url, Object.assign({
-      cache:'no-store',
-      headers:{ 'Content-Type':'application/json', 'Cache-Control':'no-cache' }
-    }, opciones || {}));
-    const txt = await res.text();
-    let data = {};
-    try{ data = txt ? JSON.parse(txt) : {}; }catch(e){ data = { raw: txt }; }
-    if(!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
-    return data;
-  }
-
-  async function cargarCatalogosKV(){
-    const data = await apiJSON('/api/catalogos?t=' + Date.now(), { method:'GET' });
-    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data || {})); }catch(e){}
-    try{ if(typeof window.renderCatalogosPro === 'function') window.renderCatalogosPro(); }catch(e){}
-    try{ if(typeof window.renderMenuLinks === 'function') window.renderMenuLinks(); }catch(e){}
-    try{ if(typeof window.refrescarEnlacesCatalogos === 'function') window.refrescarEnlacesCatalogos(); }catch(e){}
-    return data;
-  }
-
-  async function guardarCatalogoKV(e){
-    if(e){
-      e.preventDefault();
-      e.stopPropagation();
-      if(e.stopImmediatePropagation) e.stopImmediatePropagation();
-    }
-
-    const categoriaEl = $('linkProCategoria') || $('categoriaCatalogo') || $('catalogoCategoria');
-    const tituloEl = $('linkProTitulo') || $('tituloCatalogo') || $('catalogoTitulo');
-    const urlEl = $('linkProURL') || $('urlCatalogo') || $('catalogoUrl') || $('linkCatalogo');
-
-    if(!categoriaEl || !urlEl){
-      alert('No encontré los campos para guardar el catálogo.');
-      return false;
-    }
-
-    const categoria = String(categoriaEl.value || '').trim();
-    const titulo = String((tituloEl && tituloEl.value) || categoria || 'Catálogo').trim();
-    const url = normalizarURL(urlEl.value);
-
-    if(!categoria){
-      alert('Seleccione una categoría del menú.');
-      return false;
-    }
-
-    if(!/^https?:\/\//i.test(url)){
-      alert('Pegue un link válido.');
-      return false;
-    }
-
-    const btn = $('btnGuardarLinkPro') || $('btnGuardarCatalogo') || $('guardarCatalogo');
-    const oldText = btn ? btn.textContent : '';
-
-    try{
-      if(btn){
-        btn.disabled = true;
-        btn.textContent = 'Guardando global...';
-      }
-
-      const r = await apiJSON('/api/guardar', {
-        method:'POST',
-        body: JSON.stringify({ categoria, titulo, url })
-      });
-
-      const data = r.data || await cargarCatalogosKV();
-      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data || {})); }catch(e){}
-
-      if(urlEl) urlEl.value = '';
-      if(tituloEl) tituloEl.value = '';
-
-      try{ if(typeof window.renderCatalogosPro === 'function') window.renderCatalogosPro(); }catch(e){}
-      try{ if(typeof window.renderMenuLinks === 'function') window.renderMenuLinks(); }catch(e){}
-      try{ if(typeof window.refrescarEnlacesCatalogos === 'function') window.refrescarEnlacesCatalogos(); }catch(e){}
-
-      setTimeout(cargarCatalogosKV, 500);
-      setTimeout(cargarCatalogosKV, 1800);
-
-      alert('Catálogo guardado GLOBALMENTE. Ya debe verse en celular y computadora.');
-    }catch(err){
-      alert('Error guardando en Vercel KV: ' + err.message);
-    }finally{
-      if(btn){
-        btn.disabled = false;
-        btn.textContent = oldText || 'Guardar link';
-      }
-    }
-
-    return false;
-  }
-
-  function conectarGuardar(){
-    const botones = [
-      $('btnGuardarLinkPro'),
-      $('btnGuardarCatalogo'),
-      $('guardarCatalogo'),
-      $('btnSubirLink')
-    ].filter(Boolean);
-
-    botones.forEach(btn => {
-      btn.onclick = guardarCatalogoKV;
-    });
-
-    document.addEventListener('click', function(e){
-      const btn = e.target && e.target.closest && e.target.closest('#btnGuardarLinkPro,#btnGuardarCatalogo,#guardarCatalogo,#btnSubirLink');
-      if(btn) return guardarCatalogoKV(e);
-    }, true);
-
-    document.addEventListener('submit', function(e){
-      const form = e.target;
-      if(!form) return;
-      if(form.querySelector && form.querySelector('#linkProURL,#urlCatalogo,#catalogoUrl,#linkCatalogo')){
-        return guardarCatalogoKV(e);
-      }
-    }, true);
-  }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', function(){
-      conectarGuardar();
-      cargarCatalogosKV().catch(()=>{});
-      setTimeout(conectarGuardar, 1000);
-      setTimeout(cargarCatalogosKV, 1500);
-    });
-  }else{
-    conectarGuardar();
-    cargarCatalogosKV().catch(()=>{});
-    setTimeout(conectarGuardar, 1000);
-    setTimeout(cargarCatalogosKV, 1500);
-  }
-
-  window.pl10GuardarCatalogoKV = guardarCatalogoKV;
-  window.pl10CargarCatalogosKV = cargarCatalogosKV;
-})();
+document.addEventListener('visibilitychange', function(){
+  if(!document.hidden && window.pl10CargarCatalogosKV) window.pl10CargarCatalogosKV();
+});
+window.addEventListener('pageshow', function(){
+  if(window.pl10CargarCatalogosKV) window.pl10CargarCatalogosKV();
+});
 </script>
 
 </body></html>
