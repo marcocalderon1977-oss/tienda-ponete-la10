@@ -2657,6 +2657,28 @@ textarea,
       </div>
     </div>
 
+    <div class="menu">
+      <button type="button" class="menu-btn" data-menu-final-ok="1" data-fix-final="1">Ropa Nike/Adidas ⬇</button>
+      <div class="submenu">
+        <a href="#" data-pl10-cat="ropa-nike-adidas" data-menu-final-ok="1">Ropa Nike/Adidas</a>
+      </div>
+    </div>
+
+    <div class="menu">
+      <button type="button" class="menu-btn" data-menu-final-ok="1" data-fix-final="1">Tenis ⬇</button>
+      <div class="submenu">
+        <a href="#" data-pl10-cat="tenis" data-menu-final-ok="1">Tenis</a>
+      </div>
+    </div>
+
+    <div class="menu">
+      <button type="button" class="menu-btn" data-menu-final-ok="1" data-fix-final="1">Tacos ⬇</button>
+      <div class="submenu">
+        <a href="#" data-pl10-cat="tacos" data-menu-final-ok="1">Tacos</a>
+      </div>
+    </div>
+
+
     <a href="#entrega" data-menu-final-ok="1"></a>
     <a href="#nuevas" data-menu-final-ok="1"></a>
     
@@ -2819,6 +2841,9 @@ textarea,
         <option value="nino-actuales">Ropa niño / Uniformes actuales</option>
         <option value="nino-retro">Ropa niño / Uniformes retro</option>
         <option value="nino-buzos">Ropa niño / Buzos niño</option>
+        <option value="ropa-nike-adidas">Ropa Nike/Adidas</option>
+        <option value="tenis">Tenis</option>
+        <option value="tacos">Tacos</option>
         <option value="entrega-hombre">Entrega inmediata / Hombre</option>
         <option value="entrega-mujer">Entrega inmediata / Mujer</option>
         <option value="entrega-nino">Entrega inmediata / Niño</option>
@@ -2879,6 +2904,9 @@ textarea,
         <option value="nino-actuales">Ropa niño / Uniformes actuales</option>
         <option value="nino-retro">Ropa niño / Uniformes retro</option>
         <option value="nino-buzos">Ropa niño / Buzos niño</option>
+        <option value="ropa-nike-adidas">Ropa Nike/Adidas</option>
+        <option value="tenis">Tenis</option>
+        <option value="tacos">Tacos</option>
         <option value="entrega-hombre">Entrega inmediata / Hombre</option>
         <option value="entrega-mujer">Entrega inmediata / Mujer</option>
         <option value="entrega-nino">Entrega inmediata / Niño</option>
@@ -3468,6 +3496,7 @@ document.addEventListener('DOMContentLoaded', function(){
       nino_buzos:"Niño buzos",
       mujer_camisas:"Mujer camisas",
       mujer_deportiva:"Mujer ropa deportiva",
+      "ropa-nike-adidas":"Ropa Nike/Adidas",
       tenis:"Tenis",
       tacos:"Tacos"
     };
@@ -4229,7 +4258,7 @@ document.addEventListener('DOMContentLoaded', () => {
       camisas_player:'Camisas Player', player:'Camisas Player', retro:'Retro', nba:'NBA', f1:'Formula 1', buzos:'Buzos',
       entrenamiento:'Ropa Entrenamiento', sin_mangas:'Entrenamiento sin mangas', polo:'Estilo Polo', sueteres:'Suéteres de equipos',
       tejidas:'Suéteres tejidas', nino_actuales:'Niño juegos actuales', nino_retro:'Niño juegos retro', nino_buzos:'Niño buzos',
-      mujer_camisas:'Mujer camisas', mujer_deportiva:'Mujer ropa deportiva', tenis:'Tenis', tacos:'Tacos'
+      mujer_camisas:'Mujer camisas', mujer_deportiva:'Mujer ropa deportiva', 'ropa-nike-adidas':'Ropa Nike/Adidas', tenis:'Tenis', tacos:'Tacos'
     };
     return mapa[valor] || valor || 'Catálogo';
   }
