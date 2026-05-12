@@ -2992,6 +2992,21 @@ body.admin-activo .seguimiento-acciones{
 }
 </style>
 
+
+<style>
+/* ===== BOTÓN ENVÍO WHATSAPP VISIBLE ===== */
+#btnEnviarPedidoWA{
+  background:#25D366!important;
+  color:white!important;
+  border:0!important;
+  border-radius:14px!important;
+  padding:15px 18px!important;
+  font-weight:900!important;
+  cursor:pointer!important;
+  box-shadow:0 12px 28px rgba(37,211,102,.22)!important;
+}
+#btnEnviarPedidoWA:hover{transform:translateY(-2px)!important}
+</style>
 </head>
 <body data-menu-final-outside="1" data-fix-outside-final="1">
 <div class="bg-escudos champions-bg">
@@ -3151,8 +3166,8 @@ body.admin-activo .seguimiento-acciones{
     <h3 class="tracking-title">📦 Seguimiento de paquetes</h3>
     <p class="tracking-desc">Consulta aquí el avance de los pedidos y paquetes.</p>
 
-    <div id="trackingRegistrosVista"><div class="tracking-record"><div class="tracking-record-head"><b>📦 werewr</b><span>🏭 En producción</label>
-<label class="tracking-admin-check"><input type="checkbox" id="checkSalida">Salida de fábrica</span></div><p style="color:#6f625d;margin:0 0 10px">fsfsdfsd</p><span class="tracking-date">45645-05-04</span></section>
+    <div id="trackingRegistrosVista"><div class="tracking-record"><div class="tracking-record-head"><b>📦 werewr</b><span>🏭 1️⃣ En producción</label>
+<label class="tracking-admin-check"><input type="checkbox" id="checkSalida">2️⃣ Salida de la fábrica</span></div><p style="color:#6f625d;margin:0 0 10px">fsfsdfsd</p><span class="tracking-date">45645-05-04</span></section>
 
 
 
@@ -3330,11 +3345,11 @@ body.admin-activo .seguimiento-acciones{
       <textarea id="trackingDescAdmin" rows="3" placeholder="Descripción, ejemplo: Pedido salió de fábrica y fue entregado al transporte."></textarea>
 
       <div class="tracking-admin-grid">
-        <label class="tracking-admin-check"><input id="trackingProduccionAdmin" type="checkbox"> 🏭 En producción</label>
-        <label class="tracking-admin-check"><input id="trackingFabricaAdmin" type="checkbox"> Salida de fábrica</label>
-        <label class="tracking-admin-check"><input id="trackingRutaAdmin" type="checkbox"> En ruta</label>
-        <label class="tracking-admin-check"><input id="trackingInternacionalAdmin" type="checkbox"> Llegó a bodega internacional</label>
-        <label class="tracking-admin-check"><input id="trackingNacionalAdmin" type="checkbox"> Llegó a bodega nacional</label>
+        <label class="tracking-admin-check"><input id="trackingProduccionAdmin" type="checkbox"> 🏭 1️⃣ En producción</label>
+        <label class="tracking-admin-check"><input id="trackingFabricaAdmin" type="checkbox"> 2️⃣ Salida de la fábrica</label>
+        <label class="tracking-admin-check"><input id="trackingRutaAdmin" type="checkbox"> 3️⃣ En ruta</label>
+        <label class="tracking-admin-check"><input id="trackingInternacionalAdmin" type="checkbox"> Llegó a 4️⃣ Llegó bodega internacional</label>
+        <label class="tracking-admin-check"><input id="trackingNacionalAdmin" type="checkbox"> Llegó a 5️⃣ Llegó bodega nacional</label>
       
       <label class="tracking-admin-check">
         <input type="checkbox" id="checkListoEntrega">
@@ -3347,7 +3362,7 @@ body.admin-activo .seguimiento-acciones{
 
       <hr style="border:0;border-top:1px solid #eadbd0;margin:20px 0">
       <h3>📋 Registros guardados</h3>
-      <div id="trackingListaAdmin"><div class="tracking-admin-record"><h4>Registro 1 - werewr</h4><p style="color:#6f625d;margin:6px 0">fsfsdfsd</p><small style="color:#243b8f;font-weight:900">45645-05-04 · Salida de fábrica</small><button type="button" class="small-btn danger" onclick="borrarTrackingPL10(0)">Borrar registro</button></div></div>
+      <div id="trackingListaAdmin"><div class="tracking-admin-record"><h4>Registro 1 - werewr</h4><p style="color:#6f625d;margin:6px 0">fsfsdfsd</p><small style="color:#243b8f;font-weight:900">45645-05-04 · 2️⃣ Salida de la fábrica</small><button type="button" class="small-btn danger" onclick="borrarTrackingPL10(0)">Borrar registro</button></div></div>
     </div>
     <div id="adminStats" class="hidden"><h3>📊 Estadísticas por mes</h3><div class="admin-dashboard"><div class="admin-card"><strong id="visitasMes">155</strong><br>Visitas este mes</div><div class="admin-card"><strong id="totalVisitas">155</strong><br>Total visitas</div></div><h3>Visitas por mes</h3><div id="statsMeses" class="admin-list"><div class="admin-item"><b>2026-05</b><br><small>155 visitas</small></div></div><h3>Partes donde entraron por mes</h3><div id="statsSecciones" class="admin-list"><div class="admin-item"><b>entrega</b><br><small>203 visitas</small></div><div class="admin-item"><b>inicio</b><br><small>201 visitas</small></div><div class="admin-item"><b>nuevas</b><br><small>197 visitas</small></div><div class="admin-item"><b>noticias</b><br><small>194 visitas</small></div><div class="admin-item"><b></b><br><small>64 visitas</small></div><div class="admin-item"><b>adminLogin</b><br><small>55 visitas</small></div><div class="admin-item"><b>adminPanel</b><br><small>54 visitas</small></div><div class="admin-item"><b>categorias</b><br><small>20 visitas</small></div></div><h3>🗑️ Borrar estadísticas por año</h3><select id="statsAnoBorrar"><option value="2026">2026</option></select><button id="btnBorrarStatsAno" type="button" class="small-btn danger">Borrar año seleccionado</button><button id="btnDescargarStats" type="button" class="btn btn-green">Descargar reporte TXT</button><button id="btnReiniciarStats" type="button" class="btn btn-dark">Borrar todas las estadísticas</button></div>
 
@@ -3405,7 +3420,7 @@ body.admin-activo .seguimiento-acciones{
       </div>
     </div>
     <div id="avisoFotoWA" class="aviso-foto-wa hidden">📌 Foto seleccionada. Cuando se abra WhatsApp, adjunta esta misma foto en el chat para completar el pedido.</div>
-    
+    <button id="btnEnviarPedidoWA" type="button" class="btn btn-green" style="width:100%;font-size:18px;margin-top:12px;display:block">📲 Enviar pedido por WhatsApp</button>
   </div>
 </section>
 
@@ -3613,11 +3628,11 @@ body.admin-activo .seguimiento-acciones{
           </div>
         </div>
         <div class="package-timeline">
-          ${step('En producción','Pedido en proceso de fabricación.', !!r.produccion)}
-          ${step('Salida de fábrica','Pedido preparado y salido de fábrica.', !!r.salida)}
-          ${step('En ruta','Paquete en tránsito.', !!r.ruta)}
-          ${step('Llegó a bodega internacional','Recibido en bodega internacional.', !!r.bodegaInter)}
-          ${step('Llegó a bodega nacional','Ya ingresó a Costa Rica.', !!r.bodegaNac)}
+          ${step('1️⃣ En producción','Pedido en proceso de fabricación.', !!r.produccion)}
+          ${step('2️⃣ Salida de la fábrica','Pedido preparado y salido de fábrica.', !!r.salida)}
+          ${step('3️⃣ En ruta','Paquete en tránsito.', !!r.ruta)}
+          ${step('Llegó a 4️⃣ Llegó bodega internacional','Recibido en 4️⃣ Llegó bodega internacional.', !!r.bodegaInter)}
+          ${step('Llegó a 5️⃣ Llegó bodega nacional','Ya ingresó a Costa Rica.', !!r.bodegaNac)}
           ${step('Paquete listo para entrega','Listo para coordinar fecha.', !!r.listoEntrega)}
         </div>
       `;
@@ -7525,6 +7540,657 @@ function borrarRegistroTrackingReal(index){
 
   });
 
+})();
+</script>
+
+
+
+<!-- ===== FIX DEFINITIVO PROMO FOTOS 2026-05-11 ===== -->
+<script>
+(function(){
+  'use strict';
+
+  const PROMO_KEY = 'promoFotosFixFinal';
+  const MAX_PROMO = 5;
+
+  function $(id){ return document.getElementById(id); }
+
+  function escapeHTML(text){
+    return String(text || '').replace(/[&<>'"]/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c];
+    });
+  }
+
+  function getPromoFotos(){
+    try{
+      const arr = JSON.parse(localStorage.getItem(PROMO_KEY) || '[]');
+      return Array.isArray(arr) ? arr : [];
+    }catch(e){
+      return [];
+    }
+  }
+
+  function setPromoFotos(arr){
+    localStorage.setItem(PROMO_KEY, JSON.stringify(arr.slice(0, MAX_PROMO)));
+  }
+
+  function iniciarDesdeHTML(){
+    const actuales = getPromoFotos();
+    if(actuales.length) return;
+    const cont = $('promoImagenesVista');
+    if(!cont) return;
+    const imgs = Array.from(cont.querySelectorAll('img')).slice(0, MAX_PROMO).map(function(img, i){
+      const card = img.closest('.mini-shirt-card,.promo-img-card');
+      const name = card && card.querySelector('p') ? card.querySelector('p').textContent.trim() : ('Promo ' + (i+1));
+      return { img: img.getAttribute('src'), nombre: name || ('Promo ' + (i+1)) };
+    }).filter(function(x){ return x.img; });
+    if(imgs.length) setPromoFotos(imgs);
+  }
+
+  function renderPromoFotos(){
+    iniciarDesdeHTML();
+    const fotos = getPromoFotos();
+    const vista = $('promoImagenesVista');
+    if(vista){
+      vista.className = 'promo-img-grid';
+      vista.innerHTML = fotos.map(function(f){
+        return '<div class="mini-shirt-card promo-img-card">' +
+          '<img src="' + f.img + '" alt="' + escapeHTML(f.nombre || 'Promo') + '">' +
+          '<p>' + escapeHTML(f.nombre || 'Promo') + '</p>' +
+        '</div>';
+      }).join('');
+    }
+
+    const lista = $('listaPromoImagenes');
+    if(lista){
+      if(!fotos.length){
+        lista.innerHTML = '<p style="color:#aaa">No hay imágenes de promo.</p>';
+      }else{
+        lista.innerHTML = fotos.map(function(f,i){
+          return '<div class="admin-item">' +
+            '<b>🖼️ ' + escapeHTML(f.nombre || ('Promo ' + (i+1))) + '</b><br>' +
+            '<small>Imagen ' + (i+1) + ' de ' + MAX_PROMO + '</small><br>' +
+            '<button type="button" class="small-btn danger" data-promo-fix-del="' + i + '">Eliminar</button>' +
+          '</div>';
+        }).join('');
+      }
+    }
+  }
+
+  function fileToResizedDataURL(file){
+    return new Promise(function(resolve, reject){
+      if(!file || !file.type || !file.type.startsWith('image/')){
+        reject(new Error('Seleccione una imagen válida.'));
+        return;
+      }
+      const reader = new FileReader();
+      reader.onerror = function(){ reject(new Error('No se pudo leer la imagen.')); };
+      reader.onload = function(ev){
+        const img = new Image();
+        img.onerror = function(){ reject(new Error('No se pudo cargar la imagen.')); };
+        img.onload = function(){
+          const max = 1000;
+          let w = img.width, h = img.height;
+          if(w > h && w > max){ h = Math.round(h * max / w); w = max; }
+          else if(h >= w && h > max){ w = Math.round(w * max / h); h = max; }
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img,0,0,w,h);
+          resolve(canvas.toDataURL('image/jpeg',0.82));
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function guardarPromoImagenFix(){
+    const fileInput = $('promoImagenFile');
+    const titleInput = $('promoImagenTitulo');
+    if(!fileInput || !fileInput.files || !fileInput.files.length){
+      alert('Seleccione una foto para la promo.');
+      return;
+    }
+
+    let fotos = getPromoFotos();
+    if(fotos.length >= MAX_PROMO){
+      alert('Solo puedes tener hasta ' + MAX_PROMO + ' imágenes de promo. Borra una para subir otra.');
+      return;
+    }
+
+    try{
+      const file = fileInput.files[0];
+      const dataUrl = await fileToResizedDataURL(file);
+      fotos.unshift({
+        img: dataUrl,
+        nombre: (titleInput && titleInput.value.trim()) || file.name || 'Promo'
+      });
+      setPromoFotos(fotos);
+      fileInput.value = '';
+      if(titleInput) titleInput.value = '';
+      renderPromoFotos();
+      alert('Imagen de promo subida correctamente.');
+    }catch(err){
+      alert(err && err.message ? err.message : 'No se pudo subir la imagen de promo.');
+    }
+  }
+
+  window.renderPromoFotosFix = renderPromoFotos;
+  window.guardarPromoImagenFix = guardarPromoImagenFix;
+
+  document.addEventListener('DOMContentLoaded', function(){
+    const btn = $('btnGuardarPromoImagen');
+    if(btn){
+      btn.onclick = function(ev){
+        ev.preventDefault();
+        ev.stopPropagation();
+        guardarPromoImagenFix();
+      };
+    }
+
+    document.addEventListener('click', function(ev){
+      const del = ev.target && ev.target.closest ? ev.target.closest('[data-promo-fix-del],[data-del-promo-admin-final]') : null;
+      if(!del) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      const idx = Number(del.getAttribute('data-promo-fix-del') || del.getAttribute('data-del-promo-admin-final'));
+      const fotos = getPromoFotos();
+      if(Number.isFinite(idx)){
+        fotos.splice(idx,1);
+        setPromoFotos(fotos);
+        renderPromoFotos();
+      }
+    }, true);
+
+    renderPromoFotos();
+    setTimeout(renderPromoFotos, 500);
+    setTimeout(renderPromoFotos, 1500);
+  });
+})();
+</script>
+
+
+<script>
+/* ===== FIX FINAL NUMEROS EN SEGUIMIENTO 1-6 ===== */
+(function(){
+  const labels = [
+    ["produccion","1️⃣ En producción"],
+    ["salida","2️⃣ Salida de la fábrica"],
+    ["ruta","3️⃣ En ruta"],
+    ["bodegaInter","4️⃣ Llegó bodega internacional"],
+    ["bodegaNac","5️⃣ Llegó bodega nacional"],
+    ["listoEntrega","6️⃣ Listo para entrega"]
+  ];
+
+  function cambiarTexto(){
+    document.querySelectorAll("label, .tracking-public-box-final span, .tracking-public-check span, .package-step b, .tracking-step b, .tracking-live-check, .tracking-public-box-final").forEach(el=>{
+      let t = (el.textContent || "").trim();
+
+      if(/bodega internacional/i.test(t) && !/^4️⃣/.test(t)){
+        el.childNodes.forEach(n=>{
+          if(n.nodeType===3 && /bodega internacional/i.test(n.nodeValue)){
+            n.nodeValue = " 4️⃣ Llegó bodega internacional";
+          }
+        });
+        if(!el.querySelector("input") && !el.querySelector(".public-check-final") && !el.querySelector(".fake-check")){
+          el.textContent = "4️⃣ Llegó bodega internacional";
+        }
+      }
+
+      if(/bodega nacional/i.test(t) && !/^5️⃣/.test(t)){
+        el.childNodes.forEach(n=>{
+          if(n.nodeType===3 && /bodega nacional/i.test(n.nodeValue)){
+            n.nodeValue = " 5️⃣ Llegó bodega nacional";
+          }
+        });
+        if(!el.querySelector("input") && !el.querySelector(".public-check-final") && !el.querySelector(".fake-check")){
+          el.textContent = "5️⃣ Llegó bodega nacional";
+        }
+      }
+
+      if(/listo para entrega/i.test(t) && !/^6️⃣/.test(t)){
+        el.childNodes.forEach(n=>{
+          if(n.nodeType===3 && /listo para entrega/i.test(n.nodeValue)){
+            n.nodeValue = " 6️⃣ Listo para entrega";
+          }
+        });
+        if(!el.querySelector("input") && !el.querySelector(".public-check-final") && !el.querySelector(".fake-check")){
+          el.textContent = "6️⃣ Listo para entrega";
+        }
+      }
+    });
+  }
+
+  const oldRender = window.renderTracking;
+  window.renderTracking = function(){
+    if(typeof oldRender === "function") oldRender.apply(this, arguments);
+    cambiarTexto();
+  };
+
+  const oldAdmin = window.renderTrackingAdminLive;
+  window.renderTrackingAdminLive = function(){
+    if(typeof oldAdmin === "function") oldAdmin.apply(this, arguments);
+    cambiarTexto();
+  };
+
+  document.addEventListener("DOMContentLoaded", ()=>{
+    cambiarTexto();
+    setTimeout(cambiarTexto, 300);
+    setTimeout(cambiarTexto, 1000);
+  });
+  setInterval(cambiarTexto, 1500);
+})();
+</script>
+
+
+
+<style>
+/* ===== BOTÓN VISIBLE PARA BORRAR IMÁGENES DE PROMO INDIVIDUALMENTE ===== */
+#listaPromoImagenes{
+  display:block !important;
+  visibility:visible !important;
+  opacity:1 !important;
+}
+#listaPromoImagenes .admin-item{
+  background:#fffaf4 !important;
+  border:2px solid #eadbd0 !important;
+  border-radius:16px !important;
+  padding:14px !important;
+  margin:12px 0 !important;
+  color:#2f2a28 !important;
+  box-shadow:0 10px 24px rgba(36,59,143,.10) !important;
+}
+#listaPromoImagenes .btn-borrar-promo-individual,
+#listaPromoImagenes [data-promo-fix-del],
+#listaPromoImagenes [data-del-promo-admin-final],
+#listaPromoImagenes button{
+  display:block !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  width:100% !important;
+  margin-top:12px !important;
+  padding:13px 16px !important;
+  border:0 !important;
+  border-radius:12px !important;
+  background:#c1121f !important;
+  color:#fff !important;
+  font-size:16px !important;
+  font-weight:900 !important;
+  cursor:pointer !important;
+  text-align:center !important;
+  position:relative !important;
+  z-index:9999 !important;
+}
+#listaAdminPromoSeparadoTitulo{
+  display:block !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  color:#243b8f !important;
+}
+</style>
+
+<script>
+/* ===== FIX FINAL: BORRAR PROMO INDIVIDUAL DESDE ADMIN ===== */
+(function(){
+  const PROMO_KEY = 'promoFotosFixFinal';
+  const MAX_PROMO = 5;
+  const $ = id => document.getElementById(id);
+
+  function safeParse(value){
+    try{ return JSON.parse(value || '[]'); }catch(e){ return []; }
+  }
+
+  function getPromoFotosFinal(){
+    const arr = safeParse(localStorage.getItem(PROMO_KEY));
+    return Array.isArray(arr) ? arr.slice(0, MAX_PROMO) : [];
+  }
+
+  function setPromoFotosFinal(arr){
+    localStorage.setItem(PROMO_KEY, JSON.stringify((Array.isArray(arr) ? arr : []).slice(0, MAX_PROMO)));
+  }
+
+  function escapePromoFinal(text){
+    return String(text || '').replace(/[&<>'"]/g, function(ch){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch];
+    });
+  }
+
+  function renderPromoAdminBotonesFinal(){
+    const lista = $('listaPromoImagenes');
+    if(!lista) return;
+
+    const fotos = getPromoFotosFinal();
+    if(!fotos.length){
+      lista.innerHTML = '<div class="admin-item"><b>Sin imágenes de promo</b><br><small>Sube una imagen para verla aquí.</small></div>';
+      return;
+    }
+
+    lista.innerHTML = fotos.map(function(foto, i){
+      const nombre = escapePromoFinal(foto.nombre || ('Promo ' + (i + 1)));
+      const img = foto.img ? '<img src="' + foto.img + '" alt="' + nombre + '" style="width:70px;height:70px;object-fit:cover;border-radius:12px;display:block;margin:8px 0;">' : '';
+      return '<div class="admin-item promo-admin-item-final">' +
+        '<b>🖼️ ' + nombre + '</b>' + img +
+        '<small>Imagen ' + (i + 1) + ' de ' + MAX_PROMO + '</small>' +
+        '<button type="button" class="btn-borrar-promo-individual" data-borrar-promo-individual-final="' + i + '">🗑 BORRAR ESTA IMAGEN</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  function borrarPromoIndividualFinal(index){
+    const fotos = getPromoFotosFinal();
+    if(index < 0 || index >= fotos.length) return;
+    if(!confirm('¿Borrar esta imagen de promo?')) return;
+    fotos.splice(index, 1);
+    setPromoFotosFinal(fotos);
+
+    if(typeof window.renderPromoFotosFix === 'function') window.renderPromoFotosFix();
+    if(typeof window.renderPromoFotos === 'function') window.renderPromoFotos();
+    renderPromoAdminBotonesFinal();
+    alert('Imagen de promo borrada correctamente.');
+  }
+
+  document.addEventListener('click', function(ev){
+    const btn = ev.target && ev.target.closest ? ev.target.closest('[data-borrar-promo-individual-final]') : null;
+    if(!btn) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    borrarPromoIndividualFinal(Number(btn.getAttribute('data-borrar-promo-individual-final')));
+  }, true);
+
+  const oldRenderFix = window.renderPromoFotosFix;
+  window.renderPromoFotosFix = function(){
+    if(typeof oldRenderFix === 'function') oldRenderFix.apply(this, arguments);
+    renderPromoAdminBotonesFinal();
+  };
+
+  window.renderPromoAdminBotonesFinal = renderPromoAdminBotonesFinal;
+
+  document.addEventListener('DOMContentLoaded', function(){
+    renderPromoAdminBotonesFinal();
+    setTimeout(renderPromoAdminBotonesFinal, 400);
+    setTimeout(renderPromoAdminBotonesFinal, 1200);
+  });
+})();
+</script>
+
+
+
+<style>
+/* ===== FIX DEFINITIVO: BORRAR PROMO Y LIBERAR CUPO ===== */
+#btnLimpiarRegistroPromo{
+  display:block!important;
+  width:100%!important;
+  margin:12px 0!important;
+  padding:13px 16px!important;
+  border:0!important;
+  border-radius:12px!important;
+  background:#243b8f!important;
+  color:white!important;
+  font-weight:900!important;
+  cursor:pointer!important;
+}
+</style>
+<script>
+/* ===== FIX DEFINITIVO: BORRAR PROMO Y LIMPIAR REGISTRO INTERNO ===== */
+(function(){
+  'use strict';
+
+  const PROMO_KEYS = [
+    'promoFotosFixFinal',
+    'promoImagenes',
+    'promoFotos',
+    'imagenesPromo',
+    'promoImages',
+    'promoData',
+    'promo'
+  ];
+  const MAIN_KEY = 'promoFotosFixFinal';
+  const MAX_PROMO = 5;
+
+  function $(id){ return document.getElementById(id); }
+  function parse(value){ try{ const x = JSON.parse(value || '[]'); return Array.isArray(x) ? x : []; }catch(e){ return []; } }
+  function save(arr){ localStorage.setItem(MAIN_KEY, JSON.stringify((Array.isArray(arr) ? arr : []).filter(Boolean).slice(0, MAX_PROMO))); }
+  function read(){ return parse(localStorage.getItem(MAIN_KEY)).filter(Boolean).slice(0, MAX_PROMO); }
+  function esc(t){ return String(t || '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+
+  function limpiarKeysViejas(){
+    PROMO_KEYS.forEach(function(k){
+      if(k !== MAIN_KEY) localStorage.removeItem(k);
+    });
+  }
+
+  function pintarTodo(){
+    limpiarKeysViejas();
+    const fotos = read();
+    const vista = $('promoImagenesVista');
+    if(vista){
+      vista.className = 'promo-img-grid';
+      vista.innerHTML = fotos.map(function(f){
+        const src = f.img || f.src || f.url || f.imagen || '';
+        const nombre = f.nombre || f.titulo || f.name || 'Promo';
+        return src ? '<div class="mini-shirt-card promo-img-card"><img src="' + src + '" alt="' + esc(nombre) + '"><p>' + esc(nombre) + '</p></div>' : '';
+      }).join('');
+    }
+    const lista = $('listaPromoImagenes');
+    if(lista){
+      if(!fotos.length){
+        lista.innerHTML = '<div class="admin-item"><b>Sin imágenes de promo</b><br><small>Ya puedes subir nuevas fotos.</small></div>';
+      }else{
+        lista.innerHTML = fotos.map(function(f,i){
+          const src = f.img || f.src || f.url || f.imagen || '';
+          const nombre = f.nombre || f.titulo || f.name || ('Promo ' + (i+1));
+          return '<div class="admin-item promo-admin-item-final">' +
+            '<b>🖼️ ' + esc(nombre) + '</b>' +
+            (src ? '<img src="' + src + '" alt="' + esc(nombre) + '" style="width:70px;height:70px;object-fit:cover;border-radius:12px;display:block;margin:8px 0;">' : '') +
+            '<small>Imagen ' + (i+1) + ' de ' + MAX_PROMO + '</small>' +
+            '<button type="button" class="btn-borrar-promo-individual" data-borrar-promo-limpio="' + i + '">🗑 BORRAR ESTA IMAGEN</button>' +
+          '</div>';
+        }).join('');
+      }
+      if(!$('btnLimpiarRegistroPromo')){
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.id = 'btnLimpiarRegistroPromo';
+        btn.textContent = '🧹 LIMPIAR REGISTRO DE FOTOS BORRADAS';
+        lista.parentNode.insertBefore(btn, lista.nextSibling);
+      }
+    }
+  }
+
+  function borrarIndice(i){
+    const fotos = read();
+    if(i >= 0 && i < fotos.length){
+      fotos.splice(i,1);
+      save(fotos);
+    }
+    limpiarKeysViejas();
+    pintarTodo();
+    alert('Imagen borrada y espacio liberado. Ya puedes subir otra foto.');
+  }
+
+  function limpiarRegistroManual(){
+    // Mantiene solo las fotos que actualmente se ven en Promo; elimina cualquier conteo viejo oculto.
+    const vista = $('promoImagenesVista');
+    let visibles = [];
+    if(vista){
+      visibles = Array.from(vista.querySelectorAll('img')).slice(0, MAX_PROMO).map(function(img,i){
+        const card = img.closest('.mini-shirt-card,.promo-img-card');
+        const p = card ? card.querySelector('p') : null;
+        return { img: img.getAttribute('src'), nombre: p ? p.textContent.trim() : ('Promo ' + (i+1)) };
+      }).filter(x => x.img);
+    }
+    save(visibles);
+    limpiarKeysViejas();
+    pintarTodo();
+    alert('Registro interno limpiado. El contador de Promo quedó correcto.');
+  }
+
+  async function subirPromoLimpio(ev){
+    const btn = ev && ev.target;
+    const fileInput = $('promoImagenFile');
+    const titleInput = $('promoImagenTitulo');
+    if(!fileInput || !fileInput.files || !fileInput.files.length) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    limpiarKeysViejas();
+    const fotos = read();
+    if(fotos.length >= MAX_PROMO){
+      alert('Solo puedes tener hasta ' + MAX_PROMO + ' imágenes de promo. Borra una imagen y se liberará el espacio.');
+      return;
+    }
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e){
+      const img = new Image();
+      img.onload = function(){
+        const max = 1000;
+        let w = img.width, h = img.height;
+        if(w > h && w > max){ h = Math.round(h * max / w); w = max; }
+        else if(h >= w && h > max){ w = Math.round(w * max / h); h = max; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        const nuevas = read();
+        nuevas.unshift({ img: canvas.toDataURL('image/jpeg',0.82), nombre: (titleInput && titleInput.value.trim()) || file.name || 'Promo' });
+        save(nuevas);
+        fileInput.value = '';
+        if(titleInput) titleInput.value = '';
+        pintarTodo();
+        alert('Imagen de promo subida correctamente.');
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  document.addEventListener('click', function(ev){
+    const del = ev.target && ev.target.closest ? ev.target.closest('[data-borrar-promo-limpio],[data-borrar-promo-individual-final],[data-promo-fix-del],[data-del-promo-admin-final]') : null;
+    if(del){
+      ev.preventDefault();
+      ev.stopPropagation();
+      const raw = del.getAttribute('data-borrar-promo-limpio') || del.getAttribute('data-borrar-promo-individual-final') || del.getAttribute('data-promo-fix-del') || del.getAttribute('data-del-promo-admin-final');
+      const i = Number(raw);
+      if(Number.isFinite(i)) borrarIndice(i);
+      return;
+    }
+    if(ev.target && ev.target.id === 'btnLimpiarRegistroPromo'){
+      ev.preventDefault();
+      ev.stopPropagation();
+      limpiarRegistroManual();
+    }
+  }, true);
+
+  document.addEventListener('DOMContentLoaded', function(){
+    const btn = $('btnGuardarPromoImagen');
+    if(btn){
+      btn.onclick = subirPromoLimpio;
+    }
+    limpiarKeysViejas();
+    pintarTodo();
+    setTimeout(pintarTodo, 500);
+    setTimeout(pintarTodo, 1500);
+  });
+
+  window.renderPromoFotosFix = pintarTodo;
+  window.renderPromoAdminBotonesFinal = pintarTodo;
+})();
+</script>
+
+
+<script>
+/* ===== ENVÍO DE PEDIDO POR WHATSAPP CON FOTO SELECCIONADA ===== */
+(function(){
+  const WHATSAPP_NUMERO = '50663912715';
+  function $(id){ return document.getElementById(id); }
+  function valor(id){ return ($(id) && $(id).value ? $(id).value.trim() : ''); }
+  function nombreFoto(){
+    const input = $('fotoCamisaCliente');
+    return input && input.files && input.files[0] ? input.files[0].name : '';
+  }
+  function mostrarPreviewFoto(){
+    const input = $('fotoCamisaCliente');
+    const preview = $('previewFotoCliente');
+    const img = $('imgPreviewCliente');
+    const nombre = $('nombreFotoCliente');
+    const aviso = $('avisoFotoWA');
+    if(!input || !input.files || !input.files[0]) return;
+    const file = input.files[0];
+    if(nombre) nombre.textContent = 'Foto seleccionada: ' + file.name;
+    if(aviso) aviso.classList.remove('hidden');
+    if(preview) preview.style.display = 'block';
+    if(img){
+      const reader = new FileReader();
+      reader.onload = function(e){ img.src = e.target.result; };
+      reader.readAsDataURL(file);
+    }
+  }
+  function enviarPedidoWhatsApp(){
+    const nombre = valor('nombre');
+    const telefono = valor('telefono');
+    const direccion = valor('direccion');
+    const categoria = valor('categoriaPedido');
+    const descripcion = valor('fotoTexto');
+    const foto = nombreFoto();
+
+    const mensaje =
+`Hola, quiero hacer un pedido en PONETE LA 10.
+
+` +
+`👤 Nombre: ${nombre || 'No indicado'}
+` +
+`📞 Teléfono: ${telefono || 'No indicado'}
+` +
+`📍 Dirección: ${direccion || 'No indicada'}
+
+` +
+`🛒 Categoría: ${categoria || 'No indicada'}
+` +
+`📝 Características / descripción: ${descripcion || 'No indicada'}
+` +
+`📷 Foto seleccionada: ${foto || 'No se seleccionó foto'}
+
+` +
+`Nota: la página abre WhatsApp con todos los datos. Si seleccioné una foto, la adjunto manualmente en este chat.`;
+
+    window.open('https://wa.me/' + WHATSAPP_NUMERO + '?text=' + encodeURIComponent(mensaje), '_blank');
+
+    // Limpia toda la información de la sección de envío después de mandar a WhatsApp.
+    limpiarSeccionEnvio();
+  }
+
+  function limpiarSeccionEnvio(){
+    const campos = ['nombre','telefono','direccion','fotoTexto'];
+    campos.forEach(function(id){
+      const el = $(id);
+      if(el) el.value = '';
+    });
+
+    const categoria = $('categoriaPedido');
+    if(categoria) categoria.selectedIndex = 0;
+
+    const inputFoto = $('fotoCamisaCliente');
+    if(inputFoto) inputFoto.value = '';
+
+    const preview = $('previewFotoCliente');
+    if(preview) preview.style.display = 'none';
+
+    const img = $('imgPreviewCliente');
+    if(img) img.removeAttribute('src');
+
+    const nombre = $('nombreFotoCliente');
+    if(nombre) nombre.textContent = '';
+
+    const aviso = $('avisoFotoWA');
+    if(aviso) aviso.classList.add('hidden');
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    const inputFoto = $('fotoCamisaCliente');
+    const btn = $('btnEnviarPedidoWA');
+    if(inputFoto) inputFoto.addEventListener('change', mostrarPreviewFoto);
+    if(btn) btn.addEventListener('click', enviarPedidoWhatsApp);
+  });
 })();
 </script>
 
