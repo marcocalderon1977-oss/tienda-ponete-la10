@@ -1,17 +1,23 @@
-# Ponete La 10 - Catálogos
+# Ponete La 10 - versión final V3
 
-Página estática conectada a Supabase.
+## Publicación
+Suba estos archivos a la raíz del repositorio de GitHub:
 
-## Administración
+- `index.html`
+- `config.js`
+- `package.json`
+- `vercel.json`
 
+Vercel actualizará la página automáticamente.
+
+## Supabase
+Ejecute una sola vez `supabase_v3.sql` en **SQL Editor > Run**.
+El resultado esperado es `V3 lista`.
+
+## Administrador
 - Clave: `COCO`
-- WhatsApp: `+506 6391-2715`
+- Puede agregar, editar, ocultar, ordenar y borrar enlaces.
+- Las imágenes son opcionales y se agregan mediante una URL pública.
 
-## Archivos principales
-
-- `index.html`: página y panel de administración.
-- `config.js`: conexión pública a Supabase y WhatsApp.
-- `package.json`: genera la carpeta `dist` para Vercel.
-- `vercel.json`: configura el despliegue en Vercel.
-
-Vercel publica únicamente el contenido de `dist`, por lo que las carpetas antiguas del repositorio no afectan el nuevo diseño.
+## WhatsApp
+Configurado para `+506 6391-2715`.
