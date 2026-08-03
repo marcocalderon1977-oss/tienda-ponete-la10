@@ -1,8 +1,8 @@
 {
-  "name": "ponete-la10-pro-integrado",
+  "name": "ponete-la-10-catalogos",
   "version": "1.0.0",
-  "type": "module",
-  "dependencies": {
-    "@vercel/kv": "latest"
+  "private": true,
+  "scripts": {
+    "build": "rm -rf dist && mkdir -p dist && cp index.html config.js dist/"
   }
 }
