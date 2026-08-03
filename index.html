@@ -26,6 +26,23 @@ footer{background:#070c10;color:#fff;margin-top:8px}.footer-inner{max-width:1200
 @media(max-width:980px){.cards{grid-template-columns:repeat(3,1fr)}.nav{grid-template-columns:1fr auto}.nav-links{display:none}.admin-layout{grid-template-columns:1fr}.admin-side{display:none}}
 @media(max-width:620px){.nav{padding:14px 16px}.logo{width:125px}.wa-top{font-size:13px;padding:11px 14px}.hero{min-height:300px}.hero-copy{padding-bottom:55px}.cards{grid-template-columns:repeat(2,1fr);gap:12px}.card{min-height:230px}.catalogs{padding-left:14px;padding-right:14px}.footer-inner{grid-template-columns:1fr;text-align:center;gap:9px}.footer-logo{margin:auto}.social{justify-self:center}.admin-main{padding:18px 14px}.admin-form.show{grid-template-columns:1fr}.admin-form .wide{grid-column:auto}}
 </style>
+
+<style>
+.link-admin-box{background:#fff;border-radius:18px;padding:22px;box-shadow:0 10px 30px rgba(0,0,0,.12);max-width:900px;margin:24px auto}
+.link-admin-box h3{margin:0 0 16px}
+.link-admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.link-admin-grid input,.link-admin-grid select{width:100%;padding:14px;border:1px solid #d7dce1;border-radius:10px;font-size:16px}
+.link-admin-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.link-admin-actions button{border:0;border-radius:10px;padding:13px 18px;font-weight:700;cursor:pointer}
+.btn-save-link{background:#12b84f;color:#fff}
+.btn-clear-link{background:#eef1f4;color:#111}
+#adminLinksList{margin-top:18px;display:grid;gap:10px}
+.admin-link-row{display:grid;grid-template-columns:1.2fr .8fr 1.5fr auto;gap:10px;align-items:center;padding:12px;border:1px solid #e3e6e8;border-radius:12px}
+.admin-link-row a{color:#0a9f43;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.admin-link-row button{background:#ffeded;color:#c40000;border:1px solid #ffb7b7;border-radius:8px;padding:8px 12px;cursor:pointer}
+@media(max-width:760px){.link-admin-grid{grid-template-columns:1fr}.admin-link-row{grid-template-columns:1fr}.admin-link-row a{white-space:normal;word-break:break-all}}
+</style>
+
 </head>
 <body>
 <header class="hero" id="inicio">
@@ -103,4 +120,118 @@ qs('#adminOpen').onclick=()=>{qs('#loginOverlay').classList.add('show');qs('#adm
 renderCards();renderCategorySelect();loadCatalogs();
 if(db) db.channel('catalogos-live').on('postgres_changes',{event:'*',schema:'public',table:'catalogos'},async()=>{await loadCatalogs();if(adminKey)await loadAdmin()}).subscribe();
 </script>
+
+<section id="adminLinkManager" class="link-admin-box" style="display:none">
+  <h3>Administrar enlaces de catálogos</h3>
+  <div class="link-admin-grid">
+    <input id="linkTitle" type="text" placeholder="Nombre del catálogo">
+    <select id="linkCategory">
+      <option value="hombre">Hombre</option>
+      <option value="nino">Niño</option>
+      <option value="nike">Nike</option>
+      <option value="adidas">Adidas</option>
+      <option value="tenis">Tenis</option>
+      <option value="tacos">Tacos</option>
+    </select>
+    <input id="linkUrl" type="url" placeholder="Pega aquí el enlace del PDF o catálogo">
+  </div>
+  <div class="link-admin-actions">
+    <button class="btn-save-link" onclick="admin_agregar_catalogo_link()">Guardar enlace</button>
+    <button class="btn-clear-link" onclick="admin_limpiar_formulario_link()">Limpiar</button>
+  </div>
+  <div id="adminLinksList"></div>
+</section>
+
+
+<script>
+const LINK_TABLE = 'catalogos';
+
+function admin_mostrar_panel_links(){
+  const panel = document.getElementById('adminLinkManager');
+  if(panel) panel.style.display = 'block';
+  admin_cargar_links();
+}
+function admin_limpiar_formulario_link(){
+  document.getElementById('linkTitle').value='';
+  document.getElementById('linkUrl').value='';
+}
+async function admin_agregar_catalogo_link(){
+  const titulo = document.getElementById('linkTitle').value.trim();
+  const categoria = document.getElementById('linkCategory').value;
+  const enlace = document.getElementById('linkUrl').value.trim();
+  if(!titulo || !enlace){ alert('Escribe el nombre y pega el enlace.'); return; }
+  try{ new URL(enlace); }catch(e){ alert('El enlace no es válido.'); return; }
+  try{
+    const { data: cats, error: catErr } = await supabaseClient
+      .from('categorias').select('id,slug').eq('slug', categoria).limit(1);
+    if(catErr) throw catErr;
+    if(!cats || !cats.length) throw new Error('Categoría no encontrada');
+    const { error } = await supabaseClient.from(LINK_TABLE).insert([{
+      categoria_id: cats[0].id, titulo, enlace, activo:true
+    }]);
+    if(error) throw error;
+    admin_limpiar_formulario_link();
+    await admin_cargar_links();
+    if(typeof cargarCatalogos === 'function') await cargarCatalogos();
+    alert('Enlace guardado. Ya puede verse en todos los celulares.');
+  }catch(err){
+    console.error(err);
+    alert('No se pudo guardar el enlace: ' + (err.message || err));
+  }
+}
+async function admin_cargar_links(){
+  const box = document.getElementById('adminLinksList');
+  if(!box) return;
+  box.innerHTML = 'Cargando...';
+  try{
+    const { data, error } = await supabaseClient
+      .from('catalogos')
+      .select('id,titulo,enlace,activo,categoria_id,categorias(nombre,slug)')
+      .order('creado_en', {ascending:false});
+    if(error) throw error;
+    box.innerHTML = '';
+    if(!data || !data.length){ box.innerHTML = '<p>No hay enlaces guardados.</p>'; return; }
+    data.forEach(item=>{
+      const row = document.createElement('div');
+      row.className = 'admin-link-row';
+      const catName = item.categorias?.nombre || item.categorias?.slug || '';
+      row.innerHTML = `
+        <strong>${escapeHtmlLink(item.titulo || '')}</strong>
+        <span>${escapeHtmlLink(catName)}</span>
+        <a href="${escapeAttrLink(item.enlace || '#')}" target="_blank" rel="noopener">Abrir enlace</a>
+        <button onclick="admin_borrar_catalogo_link('${item.id}')">Borrar</button>`;
+      box.appendChild(row);
+    });
+  }catch(err){
+    console.error(err);
+    box.innerHTML = '<p>No se pudieron cargar los enlaces.</p>';
+  }
+}
+async function admin_borrar_catalogo_link(id){
+  if(!confirm('¿Borrar este catálogo?')) return;
+  try{
+    const { error } = await supabaseClient.from('catalogos').delete().eq('id', id);
+    if(error) throw error;
+    await admin_cargar_links();
+    if(typeof cargarCatalogos === 'function') await cargarCatalogos();
+  }catch(err){ alert('No se pudo borrar: ' + (err.message || err)); }
+}
+function escapeHtmlLink(v){
+  return String(v).replace(/[&<>"']/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[s]));
+}
+function escapeAttrLink(v){ return String(v).replace(/"/g,'&quot;'); }
+
+document.addEventListener('click', function(e){
+  const txt = (e.target?.textContent || '').trim().toUpperCase();
+  if(txt === 'INGRESAR' || txt === 'ENTRAR'){
+    setTimeout(()=>{
+      const pass = document.querySelector('input[type="password"]');
+      if(pass && pass.value.trim().toUpperCase()==='COCO'){
+        admin_mostrar_panel_links();
+      }
+    }, 200);
+  }
+});
+</script>
+
 </body></html>
