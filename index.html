@@ -43,6 +43,19 @@ footer{background:#070c10;color:#fff;margin-top:8px}.footer-inner{max-width:1200
 @media(max-width:760px){.link-admin-grid{grid-template-columns:1fr}.admin-link-row{grid-template-columns:1fr}.admin-link-row a{white-space:normal;word-break:break-all}}
 </style>
 
+
+<style>
+#linkUploadModalV7{position:fixed;inset:0;background:rgba(0,0,0,.62);display:none;align-items:center;justify-content:center;z-index:99999;padding:18px}
+#linkUploadModalV7 .box{width:min(560px,100%);background:#fff;border-radius:18px;padding:24px;box-shadow:0 24px 70px rgba(0,0,0,.35)}
+#linkUploadModalV7 h2{margin:0 0 18px;color:#111}
+#linkUploadModalV7 input,#linkUploadModalV7 select{width:100%;box-sizing:border-box;padding:14px;margin:7px 0;border:1px solid #d9dee3;border-radius:10px;font-size:16px}
+#linkUploadModalV7 .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+#linkUploadModalV7 button{border:0;border-radius:10px;padding:12px 18px;font-weight:700;cursor:pointer}
+#linkUploadModalV7 .save{background:#16b84e;color:#fff}
+#linkUploadModalV7 .cancel{background:#e9edf1;color:#111}
+#linkUploadStatusV7{margin-top:10px;font-size:14px}
+</style>
+
 </head>
 <body>
 <header class="hero" id="inicio">
@@ -231,6 +244,83 @@ document.addEventListener('click', function(e){
       }
     }, 200);
   }
+});
+</script>
+
+
+<div id="linkUploadModalV7">
+  <div class="box">
+    <h2>Subir enlace de catálogo</h2>
+    <input id="v7Title" type="text" placeholder="Nombre del catálogo">
+    <select id="v7Category">
+      <option value="hombre">Hombre</option>
+      <option value="nino">Niño</option>
+      <option value="nike">Nike</option>
+      <option value="adidas">Adidas</option>
+      <option value="tenis">Tenis</option>
+      <option value="tacos">Tacos</option>
+    </select>
+    <input id="v7Url" type="url" placeholder="Pega aquí el enlace del PDF o catálogo">
+    <div id="linkUploadStatusV7"></div>
+    <div class="actions">
+      <button class="cancel" type="button" onclick="cerrarModalV7()">Cancelar</button>
+      <button class="save" type="button" onclick="guardarLinkV7()">Guardar enlace</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+function abrirModalV7(){
+  const m=document.getElementById('linkUploadModalV7');
+  if(m) m.style.display='flex';
+}
+function cerrarModalV7(){
+  const m=document.getElementById('linkUploadModalV7');
+  if(m) m.style.display='none';
+}
+async function guardarLinkV7(){
+  const titulo=document.getElementById('v7Title').value.trim();
+  const categoria=document.getElementById('v7Category').value;
+  const enlace=document.getElementById('v7Url').value.trim();
+  const status=document.getElementById('linkUploadStatusV7');
+  if(!titulo || !enlace){ status.textContent='Escribe el nombre y pega el enlace.'; return; }
+  try{ new URL(enlace); }catch(e){ status.textContent='El enlace no es válido.'; return; }
+  status.textContent='Guardando...';
+  try{
+    const client = window.supabaseClient || window.supabase;
+    if(!client || !client.from) throw new Error('No hay conexión con Supabase');
+    const {data:cats,error:catErr}=await client.from('categorias').select('id,slug').eq('slug',categoria).limit(1);
+    if(catErr) throw catErr;
+    if(!cats || !cats.length) throw new Error('Categoría no encontrada');
+    const {error}=await client.from('catalogos').insert([{
+      categoria_id:cats[0].id,
+      titulo:titulo,
+      enlace:enlace,
+      activo:true
+    }]);
+    if(error) throw error;
+    status.textContent='Enlace guardado correctamente.';
+    setTimeout(()=>location.reload(),700);
+  }catch(err){
+    console.error(err);
+    status.textContent='No se pudo guardar: '+(err.message||err);
+  }
+}
+document.addEventListener('click',function(e){
+  const t=(e.target?.textContent||'').trim().toUpperCase();
+  if(t.includes('SUBIR CATÁLOGO') || t.includes('SUBIR CATALOGO')){
+    e.preventDefault();
+    abrirModalV7();
+  }
+});
+window.addEventListener('load',function(){
+  document.querySelectorAll('button,a').forEach(el=>{
+    const t=(el.textContent||'').trim().toUpperCase();
+    if(t.includes('SUBIR CATÁLOGO') || t.includes('SUBIR CATALOGO')){
+      el.onclick=function(ev){ev.preventDefault();abrirModalV7();};
+    }
+  });
 });
 </script>
 
