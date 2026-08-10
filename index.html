@@ -73,6 +73,15 @@ footer{background:#070c10;color:#fff;margin-top:8px}.footer-inner{max-width:1200
 @media(max-width:760px){.trust-wrap{grid-template-columns:1fr}.trust-box{padding:18px 14px}.trust-box h3{font-size:17px}}
 </style>
 
+
+<style id="visit-counter-admin-css">
+.visit-admin-box{margin-top:24px;background:#fff;border-radius:14px;padding:20px;box-shadow:0 6px 20px rgba(0,0,0,.06)}
+.visit-admin-head{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.visit-admin-head h2{margin:0}.visit-admin-actions{display:flex;gap:9px;flex-wrap:wrap}
+.visit-btn{border:0;border-radius:8px;padding:10px 13px;font-weight:800}.visit-btn.primary{background:var(--green);color:#fff}.visit-btn.danger{background:#ffe9e9;color:#c62828}.visit-btn.dark{background:#24343d;color:#fff}
+.visit-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}.visit-stat{border:1px solid #edf0f2;border-radius:12px;padding:16px}.visit-stat span{display:block;color:#6b7378;font-size:12px}.visit-stat strong{display:block;font-size:28px;margin-top:4px}.visit-filter{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}.visit-filter input{border:1px solid var(--line);border-radius:8px;padding:10px}.visit-note{font-size:12px;color:#687178;margin-top:10px}
+@media(max-width:700px){.visit-cards{grid-template-columns:1fr}.visit-admin-actions{width:100%}.visit-btn{flex:1}.visit-filter input{width:100%}}
+</style>
 </head>
 <body>
 <header class="hero" id="inicio">
@@ -134,6 +143,25 @@ footer{background:#070c10;color:#fff;margin-top:8px}.footer-inner{max-width:1200
 <button class="wide" id="saveButton" type="submit">Subir y guardar catálogo</button>
 </form>
 <div class="table"><table><thead><tr><th>ID</th><th>Nombre</th><th>Categoría</th><th>Archivo</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="adminTable"></tbody></table></div>
+<section class="visit-admin-box" id="visitAdminBox">
+  <div class="visit-admin-head">
+    <div><h2>Visitas de la página</h2><p>Contador diario visible únicamente dentro del administrador.</p></div>
+    <div class="visit-admin-actions">
+      <button class="visit-btn primary" type="button" onclick="cargarVisitasAdmin()">Actualizar</button>
+      <button class="visit-btn dark" type="button" onclick="descargarReporteVisitas()">Hacer reporte CSV</button>
+      <button class="visit-btn danger" type="button" onclick="borrarTodasVisitas()">Borrar historial</button>
+    </div>
+  </div>
+  <div class="visit-cards">
+    <div class="visit-stat"><span>Visitas hoy</span><strong id="visitasHoy">0</strong></div>
+    <div class="visit-stat"><span>Últimos 7 días</span><strong id="visitas7">0</strong></div>
+    <div class="visit-stat"><span>Total registrado</span><strong id="visitasTotal">0</strong></div>
+  </div>
+  <div class="visit-filter"><label for="visitDeleteDate"><strong>Borrar un día:</strong></label><input id="visitDeleteDate" type="date"><button class="visit-btn danger" type="button" onclick="borrarVisitasDia()">Borrar ese día</button></div>
+  <div class="table"><table><thead><tr><th>Fecha</th><th>Visitas</th></tr></thead><tbody id="visitasTable"><tr><td colspan="2">Cargando...</td></tr></tbody></table></div>
+  <div class="visit-note" id="visitStatus"></div>
+</section>
+
 </main>
 </div>
 </section>
@@ -162,7 +190,7 @@ function renderCategorySelect(){qs('#catalogCategory').innerHTML=adminCategories
 async function loadCatalogs(){if(!db)return;const {data,error}=await db.from('catalogos_publicos').select('*').order('categoria_orden').order('orden');if(error){console.error(error);return}catalogs=data||[]}
 function openGroup(slug){const group=publicGroups.find(x=>x.slug===slug);if(!group)return;const children=(group.children&&group.children.length)?group.children:[group.slug];const list=catalogs.filter(c=>children.includes(c.categoria_slug));qs('#viewerTitle').textContent=group.name;qs('#viewerList').innerHTML=list.length?list.map(c=>`<div class="catalog-item"><div><strong>${c.titulo}</strong><div style="font-size:12px;color:#777;margin-top:3px">${c.categoria||''}</div></div><a href="${c.enlace}" target="_blank" rel="noopener">Ver PDF</a></div>`).join(''):'<div class="empty">No hay catálogos disponibles todavía.</div>';qs('#viewerOverlay').classList.add('show')}
 async function tryLogin(){const key=qs('#adminPassword').value.trim().toUpperCase();qs('#loginMessage').textContent='';if(key!=='COCO'){qs('#loginMessage').textContent='Clave incorrecta';return}adminKey='COCO';qs('#loginOverlay').classList.remove('show');qs('#adminPanel').classList.add('show');await loadAdmin()}
-async function loadAdmin(){const {data,error}=await db.rpc('admin_listar_catalogos',{p_clave:adminKey});if(error){alert(error.message);return}const rows=(data||[]).filter(x=>x.catalogo_id);qs('#adminTable').innerHTML=rows.length?rows.map((r,i)=>`<tr><td>${i+1}</td><td>${r.titulo}</td><td>${r.categoria}</td><td><a href="${r.enlace}" target="_blank" style="color:#0da348;font-weight:700">▧ Ver PDF</a></td><td>${new Date().toLocaleDateString('es-CR')}</td><td><button class="edit" onclick="renameCatalog('${r.catalogo_id}','${encodeURIComponent(r.titulo)}','${encodeURIComponent(r.enlace)}')">✎</button> <button class="del" onclick="removeCatalog('${r.catalogo_id}','${encodeURIComponent(r.storage_path||'')}')">▢</button></td></tr>`).join(''):'<tr><td colspan="6">No hay catálogos cargados.</td></tr>'}
+async function loadAdmin(){const {data,error}=await db.rpc('admin_listar_catalogos',{p_clave:adminKey});if(error){alert(error.message);return}const rows=(data||[]).filter(x=>x.catalogo_id);qs('#adminTable').innerHTML=rows.length?rows.map((r,i)=>`<tr><td>${i+1}</td><td>${r.titulo}</td><td>${r.categoria}</td><td><a href="${r.enlace}" target="_blank" style="color:#0da348;font-weight:700">▧ Ver PDF</a></td><td>${new Date().toLocaleDateString('es-CR')}</td><td><button class="edit" onclick="renameCatalog('${r.catalogo_id}','${encodeURIComponent(r.titulo)}','${encodeURIComponent(r.enlace)}')">✎</button> <button class="del" onclick="removeCatalog('${r.catalogo_id}','${encodeURIComponent(r.storage_path||'')}')">▢</button></td></tr>`).join(''):'<tr><td colspan="6">No hay catálogos cargados.</td></tr>';await cargarVisitasAdmin()}
 async function uploadCatalog(e){e.preventDefault();const file=qs('#catalogFile').files[0];if(!file)return;const title=qs('#catalogName').value.trim();const slug=qs('#catalogCategory').value;const safe=file.name.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9._-]/g,'_');const path=`${Date.now()}_${safe}`;qs('#saveButton').disabled=true;qs('#saveButton').textContent='Subiendo...';const up=await db.storage.from('catalogos').upload(path,file,{contentType:'application/pdf',upsert:false});if(up.error){alert(up.error.message);resetSave();return}const pub=db.storage.from('catalogos').getPublicUrl(path).data.publicUrl;const {error}=await db.rpc('admin_agregar_catalogo_archivo',{p_clave:adminKey,p_categoria_slug:slug,p_titulo:title,p_enlace:pub,p_storage_path:path});if(error){await db.storage.from('catalogos').remove([path]);alert(error.message);resetSave();return}e.target.reset();e.target.classList.remove('show');await loadCatalogs();await loadAdmin();resetSave()}
 function resetSave(){qs('#saveButton').disabled=false;qs('#saveButton').textContent='Subir y guardar catálogo'}
 async function removeCatalog(id,path){if(!confirm('¿Eliminar este catálogo?'))return;const {error}=await db.rpc('admin_borrar_catalogo_archivo',{p_clave:adminKey,p_catalogo_id:id});if(error){alert(error.message);return}if(path)await db.storage.from('catalogos').remove([decodeURIComponent(path)]);await loadCatalogs();await loadAdmin()}
@@ -466,4 +494,69 @@ function abrirCategoria(slug){
 })();
 </script>
 
+
+<script id="visit-counter-admin-js">
+(function(){
+  const TZ='America/Costa_Rica';
+  window._visitasAdminRows=[];
+  function fechaCR(d=new Date()){
+    const p=new Intl.DateTimeFormat('en-CA',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d);
+    const o={}; p.forEach(x=>o[x.type]=x.value); return `${o.year}-${o.month}-${o.day}`;
+  }
+  async function cliente(){
+    if(window.db && window.db.rpc) return window.db;
+    if(typeof db!=='undefined' && db && db.rpc) return db;
+    if(window.supabaseClient && window.supabaseClient.rpc) return window.supabaseClient;
+    for(let i=0;i<20;i++){await new Promise(r=>setTimeout(r,150));if(window.supabaseClient&&window.supabaseClient.rpc)return window.supabaseClient;}
+    return null;
+  }
+  async function registrar(){
+    try{
+      const hoy=fechaCR(); const key='ponetela10_visit_'+hoy;
+      if(sessionStorage.getItem(key)) return;
+      const c=await cliente(); if(!c) return;
+      const {error}=await c.rpc('registrar_visita_web');
+      if(!error) sessionStorage.setItem(key,'1'); else console.warn('Contador de visitas:',error.message);
+    }catch(e){console.warn('Contador de visitas:',e);}
+  }
+  window.cargarVisitasAdmin=async function(){
+    const status=document.getElementById('visitStatus');
+    if(!adminKey){if(status)status.textContent='Inicia sesión como administrador para ver las visitas.';return;}
+    const c=await cliente(); if(!c){if(status)status.textContent='No se pudo conectar al contador.';return;}
+    if(status)status.textContent='Actualizando...';
+    const {data,error}=await c.rpc('admin_listar_visitas_web',{p_clave:adminKey});
+    if(error){if(status)status.textContent='Falta activar el contador en Supabase: '+error.message;return;}
+    const rows=(data||[]).map(r=>({fecha:String(r.fecha).slice(0,10),visitas:Number(r.visitas||0)})).sort((a,b)=>b.fecha.localeCompare(a.fecha));
+    window._visitasAdminRows=rows;
+    const hoy=fechaCR(); const hoyDate=new Date(hoy+'T12:00:00-06:00'); const lim=new Date(hoyDate); lim.setDate(lim.getDate()-6); const limStr=fechaCR(lim);
+    const vHoy=rows.find(r=>r.fecha===hoy)?.visitas||0;
+    const v7=rows.filter(r=>r.fecha>=limStr&&r.fecha<=hoy).reduce((a,r)=>a+r.visitas,0);
+    const total=rows.reduce((a,r)=>a+r.visitas,0);
+    document.getElementById('visitasHoy').textContent=vHoy.toLocaleString('es-CR');
+    document.getElementById('visitas7').textContent=v7.toLocaleString('es-CR');
+    document.getElementById('visitasTotal').textContent=total.toLocaleString('es-CR');
+    document.getElementById('visitasTable').innerHTML=rows.length?rows.map(r=>`<tr><td>${r.fecha}</td><td><strong>${r.visitas.toLocaleString('es-CR')}</strong></td></tr>`).join(''):'<tr><td colspan="2">Aún no hay visitas registradas.</td></tr>';
+    if(status)status.textContent='Última actualización: '+new Date().toLocaleString('es-CR',{timeZone:TZ});
+  };
+  window.descargarReporteVisitas=function(){
+    const rows=window._visitasAdminRows||[]; if(!rows.length){alert('No hay datos para crear el reporte.');return;}
+    const total=rows.reduce((a,r)=>a+r.visitas,0);
+    const csv=['Fecha,Visitas',...rows.map(r=>`${r.fecha},${r.visitas}`),`TOTAL,${total}`].join('\n');
+    const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'}); const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);a.download='reporte_visitas_'+fechaCR()+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  };
+  window.borrarVisitasDia=async function(){
+    const fecha=document.getElementById('visitDeleteDate').value;if(!fecha){alert('Selecciona la fecha que quieres borrar.');return;}
+    if(!confirm('¿Borrar las visitas del '+fecha+'?'))return;
+    const c=await cliente();const {error}=await c.rpc('admin_borrar_visitas_web',{p_clave:adminKey,p_fecha:fecha,p_borrar_todo:false});
+    if(error){alert(error.message);return;} await cargarVisitasAdmin();
+  };
+  window.borrarTodasVisitas=async function(){
+    if(!confirm('¿Borrar TODO el historial de visitas? Esta acción no se puede deshacer.'))return;
+    const c=await cliente();const {error}=await c.rpc('admin_borrar_visitas_web',{p_clave:adminKey,p_fecha:null,p_borrar_todo:true});
+    if(error){alert(error.message);return;} await cargarVisitasAdmin();
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',registrar);else registrar();
+})();
+</script>
 </body></html>
