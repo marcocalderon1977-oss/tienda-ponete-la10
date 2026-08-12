@@ -188,7 +188,7 @@ function renderCategorySelect(){qs('#catalogCategory').innerHTML=adminCategories
 async function loadCatalogs(){if(!db)return;const {data,error}=await db.from('catalogos_publicos').select('*').order('categoria_orden').order('orden');if(error){console.error(error);return}catalogs=data||[]}
 function openGroup(slug){const group=publicGroups.find(x=>x.slug===slug);if(!group)return;const children=(group.children&&group.children.length)?group.children:[group.slug];const list=catalogs.filter(c=>children.includes(c.categoria_slug));qs('#viewerTitle').textContent=group.name;qs('#viewerList').innerHTML=list.length?list.map(c=>`<div class="catalog-item"><div><strong>${c.titulo}</strong><div style="font-size:12px;color:#777;margin-top:3px">${c.categoria||''}</div></div><a href="${c.enlace}" target="_blank" rel="noopener">Ver PDF</a></div>`).join(''):'<div class="empty">No hay catálogos disponibles todavía.</div>';qs('#viewerOverlay').classList.add('show')}
 async function tryLogin(){const key=qs('#adminPassword').value.trim().toUpperCase();qs('#loginMessage').textContent='';if(key!=='COCO'){qs('#loginMessage').textContent='Clave incorrecta';return}adminKey='COCO';qs('#loginOverlay').classList.remove('show');qs('#adminPanel').classList.add('show');await loadAdmin()}
-async function loadAdmin(){const {data,error}=await db.rpc('admin_listar_catalogos',{p_clave:adminKey});if(error){alert(error.message);return}const rows=(data||[]).filter(x=>x.catalogo_id);qs('#adminTable').innerHTML=rows.length?rows.map((r,i)=>`<tr><td>${i+1}</td><td>${r.titulo}</td><td>${r.categoria}</td><td><a href="${r.enlace}" target="_blank" style="color:#0da348;font-weight:700">▧ Ver PDF</a></td><td>${new Date().toLocaleDateString('es-CR')}</td><td><button class="edit" onclick="renameCatalog('${r.catalogo_id}','${encodeURIComponent(r.titulo)}','${encodeURIComponent(r.enlace)}')">✎</button> <button class="del" onclick="removeCatalog('${r.catalogo_id}','${encodeURIComponent(r.storage_path||'')}')">▢</button></td></tr>`).join(''):'<tr><td colspan="6">No hay catálogos cargados.</td></tr>';await cargarVisitasAdmin()}
+async function loadAdmin(){const {data,error}=await db.rpc('admin_listar_catalogos',{p_clave:adminKey});if(error){alert(error.message);return}const rows=(data||[]).filter(x=>x.catalogo_id);qs('#adminTable').innerHTML=rows.length?rows.map((r,i)=>`<tr><td>${i+1}</td><td>${r.titulo}</td><td>${nombreCategoriaVisible(r.categoria, '')}</td><td><a href="${r.enlace}" target="_blank" style="color:#0da348;font-weight:700">▧ Ver PDF</a></td><td>${new Date().toLocaleDateString('es-CR')}</td><td><button class="edit" onclick="renameCatalog('${r.catalogo_id}','${encodeURIComponent(r.titulo)}','${encodeURIComponent(r.enlace)}')">✎</button> <button class="del" onclick="removeCatalog('${r.catalogo_id}','${encodeURIComponent(r.storage_path||'')}')">▢</button></td></tr>`).join(''):'<tr><td colspan="6">No hay catálogos cargados.</td></tr>';await cargarVisitasAdmin()}
 async function uploadCatalog(e){e.preventDefault();const file=qs('#catalogFile').files[0];if(!file)return;const title=qs('#catalogName').value.trim();const slug=qs('#catalogCategory').value;const safe=file.name.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9._-]/g,'_');const path=`${Date.now()}_${safe}`;qs('#saveButton').disabled=true;qs('#saveButton').textContent='Subiendo...';const up=await db.storage.from('catalogos').upload(path,file,{contentType:'application/pdf',upsert:false});if(up.error){alert(up.error.message);resetSave();return}const pub=db.storage.from('catalogos').getPublicUrl(path).data.publicUrl;const {error}=await db.rpc('admin_agregar_catalogo_archivo',{p_clave:adminKey,p_categoria_slug:slug,p_titulo:title,p_enlace:pub,p_storage_path:path});if(error){await db.storage.from('catalogos').remove([path]);alert(error.message);resetSave();return}e.target.reset();e.target.classList.remove('show');await loadCatalogs();await loadAdmin();resetSave()}
 function resetSave(){qs('#saveButton').disabled=false;qs('#saveButton').textContent='Subir y guardar catálogo'}
 async function removeCatalog(id,path){if(!confirm('¿Eliminar este catálogo?'))return;const {error}=await db.rpc('admin_borrar_catalogo_archivo',{p_clave:adminKey,p_catalogo_id:id});if(error){alert(error.message);return}if(path)await db.storage.from('catalogos').remove([decodeURIComponent(path)]);await loadCatalogs();await loadAdmin()}
@@ -241,6 +241,23 @@ function admin_limpiar_formulario_link(){
   document.getElementById('linkTitle').value='';
   document.getElementById('linkUrl').value='';
 }
+async function resolverCategoriaDeportiva(client, categoria){
+  const slugs = categoria === 'ropa-deportiva'
+    ? ['ropa-deportiva','ropa-nike','ropa-adidas']
+    : [categoria];
+  const { data: cats, error: catErr } = await client
+    .from('categorias').select('id,slug').in('slug', slugs);
+  if(catErr) throw catErr;
+  if(!cats || !cats.length) throw new Error('Categoría no encontrada');
+  const preferida = cats.find(c=>c.slug==='ropa-deportiva') || cats.find(c=>c.slug==='ropa-nike') || cats.find(c=>c.slug==='ropa-adidas') || cats[0];
+  return preferida;
+}
+function nombreCategoriaVisible(nombre, slug){
+  if(['ropa-deportiva','ropa-nike','ropa-adidas'].includes(slug)) return 'Ropa Deportiva';
+  if(/^ropa\s+(nike|adidas)$/i.test(nombre||'')) return 'Ropa Deportiva';
+  return nombre || slug || '';
+}
+
 async function admin_agregar_catalogo_link(){
   const titulo = document.getElementById('linkTitle').value.trim();
   const categoria = document.getElementById('linkCategory').value;
@@ -248,12 +265,9 @@ async function admin_agregar_catalogo_link(){
   if(!titulo || !enlace){ alert('Escribe el nombre y pega el enlace.'); return; }
   try{ new URL(enlace); }catch(e){ alert('El enlace no es válido.'); return; }
   try{
-    const { data: cats, error: catErr } = await supabaseClient
-      .from('categorias').select('id,slug').eq('slug', categoria).limit(1);
-    if(catErr) throw catErr;
-    if(!cats || !cats.length) throw new Error('Categoría no encontrada');
+    const cat = await resolverCategoriaDeportiva(supabaseClient, categoria);
     const { error } = await supabaseClient.from(LINK_TABLE).insert([{
-      categoria_id: cats[0].id, titulo, enlace, activo:true
+      categoria_id: cat.id, titulo, enlace, activo:true
     }]);
     if(error) throw error;
     admin_limpiar_formulario_link();
@@ -280,7 +294,7 @@ async function admin_cargar_links(){
     data.forEach(item=>{
       const row = document.createElement('div');
       row.className = 'admin-link-row';
-      const catName = item.categorias?.nombre || item.categorias?.slug || '';
+      const catName = nombreCategoriaVisible(item.categorias?.nombre, item.categorias?.slug);
       row.innerHTML = `
         <strong>${escapeHtmlLink(item.titulo || '')}</strong>
         <span>${escapeHtmlLink(catName)}</span>
@@ -374,11 +388,9 @@ async function guardarLinkV7(){
       client = window.supabaseClient;
     }
     if(!client || !client.from) throw new Error('No se pudo iniciar la conexión con Supabase');
-    const {data:cats,error:catErr}=await client.from('categorias').select('id,slug').eq('slug',categoria).limit(1);
-    if(catErr) throw catErr;
-    if(!cats || !cats.length) throw new Error('Categoría no encontrada');
+    const cat=await resolverCategoriaDeportiva(client,categoria);
     const {error}=await client.from('catalogos').insert([{
-      categoria_id:cats[0].id,
+      categoria_id:cat.id,
       titulo:titulo,
       enlace:enlace,
       activo:true
