@@ -242,15 +242,37 @@ function admin_limpiar_formulario_link(){
   document.getElementById('linkUrl').value='';
 }
 async function resolverCategoriaDeportiva(client, categoria){
-  const slugs = categoria === 'ropa-deportiva'
-    ? ['ropa-deportiva','ropa-nike','ropa-adidas']
-    : [categoria];
-  const { data: cats, error: catErr } = await client
-    .from('categorias').select('id,slug').in('slug', slugs);
+  const aliases = {
+    'ropa-deportiva':['ropa-deportiva','ropa-nike','ropa-adidas'],
+    'sueter-equipos':['sueter-equipos','sueter','sueter-de-equipos','sueter-equipos'],
+    'entrega-inmediata':['entrega-inmediata','entrega inmediata']
+  };
+  const slugs = aliases[categoria] || [categoria];
+  let { data: cats, error: catErr } = await client
+    .from('categorias').select('id,nombre,slug').in('slug', slugs);
   if(catErr) throw catErr;
-  if(!cats || !cats.length) throw new Error('Categoría no encontrada');
-  const preferida = cats.find(c=>c.slug==='ropa-deportiva') || cats.find(c=>c.slug==='ropa-nike') || cats.find(c=>c.slug==='ropa-adidas') || cats[0];
-  return preferida;
+
+  if(!cats || !cats.length){
+    const { data: todas, error: todasErr } = await client.from('categorias').select('id,nombre,slug');
+    if(todasErr) throw todasErr;
+    const norm = v => (v||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    const buscados = new Set(slugs.map(norm));
+    cats = (todas||[]).filter(c => buscados.has(norm(c.slug)) || buscados.has(norm(c.nombre)));
+  }
+
+  if(!cats || !cats.length){
+    const nombres = {
+      'ropa-deportiva':'Ropa Deportiva',
+      'sueter-equipos':'Suéter de equipos',
+      'entrega-inmediata':'Entrega inmediata'
+    };
+    const { data: creada, error: crearErr } = await client
+      .from('categorias').insert({nombre:nombres[categoria] || categoria, slug:categoria}).select('id,nombre,slug').single();
+    if(crearErr) throw new Error('Categoría no encontrada y no se pudo crear: ' + crearErr.message);
+    return creada;
+  }
+
+  return cats.find(c=>c.slug===categoria) || cats.find(c=>c.slug==='ropa-deportiva') || cats.find(c=>c.slug==='ropa-nike') || cats.find(c=>c.slug==='ropa-adidas') || cats[0];
 }
 function nombreCategoriaVisible(nombre, slug){
   if(['ropa-deportiva','ropa-nike','ropa-adidas'].includes(slug)) return 'Ropa Deportiva';
