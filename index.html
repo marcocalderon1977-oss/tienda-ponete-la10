@@ -86,6 +86,7 @@ footer{background:#070c10;color:#fff;margin-top:8px}.footer-inner{max-width:1200
 </style>
 <!-- FIX categorias sueter v2026-08-12-0940 -->
 <!-- NUEVAS CATEGORIAS HOMBRE: ENTRENAMIENTO SIN MANGAS + ESTILO POLO v2026-08-13 -->
+<!-- FIX ENTREGA INMEDIATA RLS v2026-08-13 -->
 </head>
 <body>
 <header class="hero" id="inicio">
@@ -193,24 +194,24 @@ function renderCards(){document.querySelectorAll('[data-group]').forEach(b=>b.on
 function renderCategorySelect(){qs('#catalogCategory').innerHTML=adminCategories.map(([v,n])=>`<option value="${v}">${n}</option>`).join('')}
 function virtualCategoryFromTitle(title){
   const t=String(title||'');
-  const m=t.match(/^\[\[(hombre-entrenamiento-sin-mangas|hombre-estilo-polo)\]\]\s*/i);
+  const m=t.match(/^\[\[(hombre-entrenamiento-sin-mangas|hombre-estilo-polo|entrega-inmediata)\]\]\s*/i);
   return m ? m[1].toLowerCase() : '';
 }
 function stripVirtualCategoryMarker(title){
-  return String(title||'').replace(/^\[\[(hombre-entrenamiento-sin-mangas|hombre-estilo-polo)\]\]\s*/i,'');
+  return String(title||'').replace(/^\[\[(hombre-entrenamiento-sin-mangas|hombre-estilo-polo|entrega-inmediata)\]\]\s*/i,'');
 }
 function markedTitleForCategory(title,slug){
-  if(slug==='hombre-entrenamiento-sin-mangas' || slug==='hombre-estilo-polo') return `[[${slug}]] ${stripVirtualCategoryMarker(title)}`;
+  if(slug==='hombre-entrenamiento-sin-mangas' || slug==='hombre-estilo-polo' || slug==='entrega-inmediata') return `[[${slug}]] ${stripVirtualCategoryMarker(title)}`;
   return stripVirtualCategoryMarker(title);
 }
 function storageSlugForCategory(slug){
-  // Las dos categorías nuevas son virtuales para no necesitar INSERT en categorias (RLS de Supabase).
-  return (slug==='hombre-entrenamiento-sin-mangas' || slug==='hombre-estilo-polo') ? 'hombre-player' : slug;
+  // Categorías virtuales: se guardan sobre una categoría existente para evitar INSERT en categorias (RLS de Supabase).
+  return (slug==='hombre-entrenamiento-sin-mangas' || slug==='hombre-estilo-polo' || slug==='entrega-inmediata') ? 'hombre-player' : slug;
 }
-async function loadCatalogs(){if(!db)return;const {data,error}=await db.from('catalogos_publicos').select('*').order('categoria_orden').order('orden');if(error){console.error(error);return}catalogs=(data||[]).map(c=>{const v=virtualCategoryFromTitle(c.titulo);return v?{...c,categoria_slug:v,categoria:v==='hombre-entrenamiento-sin-mangas'?'Ropa Entrenamiento Sin Mangas':'Ropa Estilo Polo',titulo:stripVirtualCategoryMarker(c.titulo)}:{...c,titulo:stripVirtualCategoryMarker(c.titulo)}})}
+async function loadCatalogs(){if(!db)return;const {data,error}=await db.from('catalogos_publicos').select('*').order('categoria_orden').order('orden');if(error){console.error(error);return}catalogs=(data||[]).map(c=>{const v=virtualCategoryFromTitle(c.titulo);return v?{...c,categoria_slug:v,categoria:v==='hombre-entrenamiento-sin-mangas'?'Ropa Entrenamiento Sin Mangas':(v==='hombre-estilo-polo'?'Ropa Estilo Polo':'Entrega inmediata'),titulo:stripVirtualCategoryMarker(c.titulo)}:{...c,titulo:stripVirtualCategoryMarker(c.titulo)}})}
 function openGroup(slug){const group=publicGroups.find(x=>x.slug===slug);if(!group)return;const children=(group.children&&group.children.length)?group.children:[group.slug];const list=catalogs.filter(c=>children.includes(c.categoria_slug));qs('#viewerTitle').textContent=group.name;const colorNote=slug==='ropa-deportiva'?'<div style="background:#eaf8ef;border:1px solid #bde8ca;border-radius:12px;padding:12px 14px;margin:10px 0 14px;color:#087a32;font-weight:800;line-height:1.45">📸 Envíanos una foto para brindarte diferentes opciones de colores.</div>':'';qs('#viewerList').innerHTML=colorNote+(list.length?list.map(c=>`<div class="catalog-item"><div><strong>${c.titulo}</strong><div style="font-size:12px;color:#777;margin-top:3px">${c.categoria||''}</div></div><a href="${c.enlace}" target="_blank" rel="noopener">Ver PDF</a></div>`).join(''):'<div class="empty">No hay catálogos disponibles todavía.</div>');qs('#viewerOverlay').classList.add('show')}
 async function tryLogin(){const key=qs('#adminPassword').value.trim().toUpperCase();qs('#loginMessage').textContent='';if(key!=='COCO'){qs('#loginMessage').textContent='Clave incorrecta';return}adminKey='COCO';qs('#loginOverlay').classList.remove('show');qs('#adminPanel').classList.add('show');await loadAdmin()}
-async function loadAdmin(){const {data,error}=await db.rpc('admin_listar_catalogos',{p_clave:adminKey});if(error){alert(error.message);return}const rows=(data||[]).filter(x=>x.catalogo_id);qs('#adminTable').innerHTML=rows.length?rows.map((r,i)=>{const vc=virtualCategoryFromTitle(r.titulo);const cn=vc==='hombre-entrenamiento-sin-mangas'?'Ropa Entrenamiento Sin Mangas':vc==='hombre-estilo-polo'?'Ropa Estilo Polo':nombreCategoriaVisible(r.categoria,'');return `<tr><td>${i+1}</td><td>${stripVirtualCategoryMarker(r.titulo)}</td><td>${cn}</td><td><a href="${r.enlace}" target="_blank" style="color:#0da348;font-weight:700">▧ Ver PDF</a></td><td>${new Date().toLocaleDateString('es-CR')}</td><td><button class="edit" onclick="renameCatalog('${r.catalogo_id}','${encodeURIComponent(r.titulo)}','${encodeURIComponent(r.enlace)}')">✎</button> <button class="del" onclick="removeCatalog('${r.catalogo_id}','${encodeURIComponent(r.storage_path||'')}')">▢</button></td></tr>`}).join(''):'<tr><td colspan="6">No hay catálogos cargados.</td></tr>';await cargarVisitasAdmin()}
+async function loadAdmin(){const {data,error}=await db.rpc('admin_listar_catalogos',{p_clave:adminKey});if(error){alert(error.message);return}const rows=(data||[]).filter(x=>x.catalogo_id);qs('#adminTable').innerHTML=rows.length?rows.map((r,i)=>{const vc=virtualCategoryFromTitle(r.titulo);const cn=vc==='entrega-inmediata'?'Entrega inmediata':vc==='hombre-entrenamiento-sin-mangas'?'Ropa Entrenamiento Sin Mangas':vc==='hombre-estilo-polo'?'Ropa Estilo Polo':nombreCategoriaVisible(r.categoria,'');return `<tr><td>${i+1}</td><td>${stripVirtualCategoryMarker(r.titulo)}</td><td>${cn}</td><td><a href="${r.enlace}" target="_blank" style="color:#0da348;font-weight:700">▧ Ver PDF</a></td><td>${new Date().toLocaleDateString('es-CR')}</td><td><button class="edit" onclick="renameCatalog('${r.catalogo_id}','${encodeURIComponent(r.titulo)}','${encodeURIComponent(r.enlace)}')">✎</button> <button class="del" onclick="removeCatalog('${r.catalogo_id}','${encodeURIComponent(r.storage_path||'')}')">▢</button></td></tr>`}).join(''):'<tr><td colspan="6">No hay catálogos cargados.</td></tr>';await cargarVisitasAdmin()}
 async function uploadCatalog(e){e.preventDefault();const file=qs('#catalogFile').files[0];if(!file)return;const rawTitle=qs('#catalogName').value.trim();const selectedSlug=qs('#catalogCategory').value;const slug=storageSlugForCategory(selectedSlug);const title=markedTitleForCategory(rawTitle,selectedSlug);const safe=file.name.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9._-]/g,'_');const path=`${Date.now()}_${safe}`;qs('#saveButton').disabled=true;qs('#saveButton').textContent='Subiendo...';const up=await db.storage.from('catalogos').upload(path,file,{contentType:'application/pdf',upsert:false});if(up.error){alert(up.error.message);resetSave();return}const pub=db.storage.from('catalogos').getPublicUrl(path).data.publicUrl;const {error}=await db.rpc('admin_agregar_catalogo_archivo',{p_clave:adminKey,p_categoria_slug:slug,p_titulo:title,p_enlace:pub,p_storage_path:path});if(error){await db.storage.from('catalogos').remove([path]);alert(error.message);resetSave();return}e.target.reset();e.target.classList.remove('show');await loadCatalogs();await loadAdmin();resetSave()}
 function resetSave(){qs('#saveButton').disabled=false;qs('#saveButton').textContent='Subir y guardar catálogo'}
 async function removeCatalog(id,path){if(!confirm('¿Eliminar este catálogo?'))return;const {error}=await db.rpc('admin_borrar_catalogo_archivo',{p_clave:adminKey,p_catalogo_id:id});if(error){alert(error.message);return}if(path)await db.storage.from('catalogos').remove([decodeURIComponent(path)]);await loadCatalogs();await loadAdmin()}
@@ -302,12 +303,18 @@ async function resolverCategoriaDeportiva(client, categoria){
 
   if(cat) return cat;
 
-  // Las categorías nuevas de Hombre se guardan sobre una categoría existente y se distinguen por un marcador en el título.
-  // Esto evita el INSERT en la tabla categorias, bloqueado por RLS en Supabase.
-  if(categoria === 'hombre-entrenamiento-sin-mangas' || categoria === 'hombre-estilo-polo'){
-    const fallback = (todas || []).find(c => norm(c.slug)==='hombre-player' || norm(c.nombre)==='camisas-player' || norm(c.nombre)==='player');
+  // Categorías virtuales: se guardan sobre una categoría existente y se distinguen por un marcador en el título.
+  // Así no se intenta hacer INSERT en la tabla categorias, que está bloqueado por RLS en Supabase.
+  if(categoria === 'hombre-entrenamiento-sin-mangas' || categoria === 'hombre-estilo-polo' || categoria === 'entrega-inmediata'){
+    const fallback = (todas || []).find(c =>
+      norm(c.slug)==='hombre-player' ||
+      norm(c.nombre)==='camisas-player' ||
+      norm(c.nombre)==='player' ||
+      norm(c.slug)==='sueter-equipos' ||
+      norm(c.slug)==='sueter'
+    );
     if(fallback) return fallback;
-    throw new Error('No se encontró la categoría base Hombre/Camisas Player en Supabase.');
+    throw new Error('No se encontró una categoría base existente en Supabase para guardar este enlace.');
   }
 
   // Solo si realmente no existe, intentar crearla.
