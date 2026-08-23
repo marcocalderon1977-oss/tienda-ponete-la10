@@ -308,7 +308,8 @@ async function resolverCategoriaDeportiva(client, categoria){
     'tenis':['tenis'],
     'tacos':['tacos'],
     'hombre-entrenamiento-sin-mangas':['hombre-entrenamiento-sin-mangas','ropa-entrenamiento-sin-mangas','entrenamiento-sin-mangas'],
-    'hombre-estilo-polo':['hombre-estilo-polo','ropa-estilo-polo','estilo-polo','polos']
+    'hombre-estilo-polo':['hombre-estilo-polo','ropa-estilo-polo','estilo-polo','polos'],
+    'pantalonetas':['pantalonetas','hombre-pantalonetas']
   };
   const buscados = new Set((aliasMap[categoria] || [categoria]).map(norm));
 
@@ -338,7 +339,7 @@ async function resolverCategoriaDeportiva(client, categoria){
 
   // Categorías virtuales: se guardan sobre una categoría existente y se distinguen por un marcador en el título.
   // Así no se intenta hacer INSERT en la tabla categorias, que está bloqueado por RLS en Supabase.
-  if(categoria === 'hombre-entrenamiento-sin-mangas' || categoria === 'hombre-estilo-polo' || categoria === 'entrega-inmediata'){
+  if(categoria === 'hombre-entrenamiento-sin-mangas' || categoria === 'hombre-estilo-polo' || categoria === 'pantalonetas' || categoria === 'entrega-inmediata'){
     const fallback = (todas || []).find(c =>
       norm(c.slug)==='hombre-player' ||
       norm(c.nombre)==='camisas-player' ||
@@ -358,7 +359,8 @@ async function resolverCategoriaDeportiva(client, categoria){
     'tenis':'Tenis',
     'tacos':'Tacos',
     'hombre-entrenamiento-sin-mangas':'Ropa Entrenamiento Sin Mangas',
-    'hombre-estilo-polo':'Ropa Estilo Polo'
+    'hombre-estilo-polo':'Ropa Estilo Polo',
+    'pantalonetas':'Pantalonetas'
   };
   const esHombreNueva = categoria === 'hombre-entrenamiento-sin-mangas' || categoria === 'hombre-estilo-polo';
   let payload = {nombre:nombres[categoria] || categoria, slug:categoria};
@@ -419,7 +421,7 @@ async function admin_cargar_links(){
       const row = document.createElement('div');
       row.className = 'admin-link-row';
       const vcat = virtualCategoryFromTitle(item.titulo);
-      const catName = vcat==='hombre-entrenamiento-sin-mangas' ? 'Ropa Entrenamiento Sin Mangas' : vcat==='hombre-estilo-polo' ? 'Ropa Estilo Polo' : nombreCategoriaVisible(item.categorias?.nombre, item.categorias?.slug);
+      const catName = vcat==='hombre-entrenamiento-sin-mangas' ? 'Ropa Entrenamiento Sin Mangas' : vcat==='hombre-estilo-polo' ? 'Ropa Estilo Polo' : vcat==='pantalonetas' ? 'Pantalonetas' : nombreCategoriaVisible(item.categorias?.nombre, item.categorias?.slug);
       row.innerHTML = `
         <strong>${escapeHtmlLink(stripVirtualCategoryMarker(item.titulo || ''))}</strong>
         <span>${escapeHtmlLink(catName)}</span>
