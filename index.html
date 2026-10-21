@@ -293,6 +293,27 @@ body:has(#viewerOverlay.show) #aviso-domingos-fondo{display:none!important}
   .wa-strip { max-width:100%; flex-wrap:wrap; }
 }
 </style>
+<style id="correccion-franja-derecha-celular">
+/* Impide que elementos anchos expandan la pagina y dejen una franja a la derecha. */
+@media screen and (max-width: 760px) {
+  :root { width:100%; overflow-x:hidden; }
+  html { width:100%; max-width:100%; overflow-x:hidden; }
+  body { width:100%; max-width:100%; min-width:0; margin:0!important; overflow-x:hidden; }
+  body > header, body > section, body > main, body > footer { width:100%; max-width:100%; margin-left:0; margin-right:0; }
+  .hero, .nav, .hero-copy, .catalogs, .cards, .catalog-grid, .trust-section,
+  .trust-wrap, .footer-inner, .admin, .admin-layout, .admin-main, .admin-side {
+    box-sizing:border-box; max-width:100%; min-width:0;
+  }
+  .hero, .catalogs, footer, .trust-section { width:100%; }
+  .cards, .catalog-grid { width:100%; grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .cards > *, .catalog-grid > * { min-width:0; }
+  .admin-layout { width:100%; grid-template-columns:minmax(0,1fr); }
+  .admin-main { overflow-wrap:anywhere; }
+  .admin-main table { max-width:100%; }
+  img, iframe, video { max-width:100%; }
+  .navidad-flotante, #aviso-domingos-fondo { max-width:calc(100vw - 12px)!important; }
+}
+</style>
 </head>
 <body>
 <header class="hero" id="inicio">
