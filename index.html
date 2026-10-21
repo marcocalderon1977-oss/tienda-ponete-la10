@@ -254,6 +254,16 @@ footer{background:#070c10;color:#fff;margin-top:8px}.footer-inner{max-width:1200
  .wa-strip{margin-top:30px!important}
 }
 </style>
+<style id="pdf-visor-amplio-sin-obstrucciones">
+/* La lista de PDFs utiliza casi toda la pantalla y permite desplazarse. */
+#viewerOverlay{padding:12px!important;z-index:10020!important}
+#viewerOverlay .viewer{width:min(1100px,100%)!important;max-height:calc(100dvh - 24px)!important;min-height:min(620px,calc(100dvh - 24px))!important;overflow-y:auto!important;box-sizing:border-box!important;padding:clamp(16px,3vw,32px)!important}
+#viewerOverlay .catalog-item{min-height:64px!important;padding:15px 4px!important}
+#viewerOverlay .catalog-item a{flex-shrink:0!important}
+/* Ocultar el aviso solo mientras se consulta la lista de PDFs. */
+body:has(#viewerOverlay.show) #aviso-domingos-fondo{display:none!important}
+@media(max-width:650px){#viewerOverlay{padding:5px!important}#viewerOverlay .viewer{width:100%!important;max-height:calc(100dvh - 10px)!important;min-height:calc(100dvh - 10px)!important;padding:16px 12px!important}#viewerOverlay .catalog-item{gap:9px!important}#viewerOverlay .catalog-item a{padding:9px 11px!important}}
+</style>
 </head>
 <body>
 <header class="hero" id="inicio">
