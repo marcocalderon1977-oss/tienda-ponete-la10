@@ -314,6 +314,19 @@ body:has(#viewerOverlay.show) #aviso-domingos-fondo{display:none!important}
   .navidad-flotante, #aviso-domingos-fondo { max-width:calc(100vw - 12px)!important; }
 }
 </style>
+<style id="bloqueo-desplazamiento-horizontal-movil">
+/* La pagina solo se desplaza verticalmente en telefonos. */
+@media (max-width: 760px) {
+  html { width:100%!important; max-width:100%!important; overflow-x:clip!important; overscroll-behavior-x:none; }
+  body { width:100%!important; max-width:100%!important; min-width:0!important; overflow-x:clip!important; overscroll-behavior-x:none; touch-action:pan-y pinch-zoom; }
+  body > * { max-width:100%; }
+  .hero, .catalogs, footer { overflow-x:clip; }
+  .cards, .catalog-grid { min-width:0; }
+  /* Las tablas del administrador pueden desplazarse dentro de su propio cuadro. */
+  .admin, .overlay, .table, #visitasPanel { touch-action:pan-y pinch-zoom; }
+  .table { overflow-x:auto!important; }
+}
+</style>
 </head>
 <body>
 <header class="hero" id="inicio">
