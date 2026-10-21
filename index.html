@@ -340,6 +340,9 @@ body:has(#viewerOverlay.show) #aviso-domingos-fondo{display:none!important}
 <input accept="application/pdf" class="wide" id="catalogFile" required="" type="file"/>
 <button class="wide" id="saveButton" type="submit">Subir y guardar catálogo</button>
 </form>
+
+<div class="table"><table><thead><tr><th>ID</th><th>Nombre</th><th>Categoría</th><th>Archivo</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="adminTable"></tbody></table></div>
+<div style="margin:22px 0 12px"><button type="button" id="visitasAlFinal" style="display:block;width:100%;padding:16px;background:#0c6845;color:white;border:0;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer">📊 VER VISITAS ÚNICAS Y ESTADÍSTICAS</button></div>
 <section id="visitasPanel" style="display:none;background:#fff;color:#172033;border-radius:14px;padding:20px;margin:18px 0;box-shadow:0 3px 14px #0002">
 <h2 style="margin:0 0 8px">📊 Visitas únicas por día</h2>
 <p style="margin:0 0 15px;color:#5a6472">Cada navegador se cuenta una vez por día. El total mensual es la suma de las visitas únicas diarias.</p>
@@ -348,7 +351,6 @@ body:has(#viewerOverlay.show) #aviso-domingos-fondo{display:none!important}
 <div id="visitasEstado" role="status" style="margin-bottom:8px"></div>
 <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;padding:8px">Día</th><th style="text-align:right;padding:8px">Visitantes únicos</th></tr></thead><tbody id="visitasDias"></tbody></table></div>
 </section>
-<div class="table"><table><thead><tr><th>ID</th><th>Nombre</th><th>Categoría</th><th>Archivo</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="adminTable"></tbody></table></div>
 </main>
 </div>
 </section>
@@ -809,6 +811,7 @@ function abrirCategoria(slug){
       const p=$('visitasPanel');p.style.display=p.style.display==='none'?'block':'none';
       if(p.style.display==='block'){cargar();p.scrollIntoView({behavior:'smooth',block:'start'})}
     });
+    $('visitasAlFinal').addEventListener('click',()=>{ $('sideVisits').click(); });
     $('visitasActualizar').addEventListener('click',cargar);
     $('visitasMes').addEventListener('change',cargar);
     $('visitasBorrar').addEventListener('click',borrar);
