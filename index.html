@@ -343,6 +343,44 @@ body:has(#viewerOverlay.show) #aviso-domingos-fondo{display:none!important}
   body { margin:0 !important; }
 }
 </style>
+<style id="navidad-animaciones-dentro-de-pantalla-final">
+/* Trineos siempre dentro del ancho visible: recorrido desde borde a borde sin salir. */
+@media screen and (max-width:760px) {
+  html, body { width:100% !important; max-width:100% !important; overflow-x:clip !important; margin:0 !important; }
+  #ponete-animaciones-contenidas {
+    display:block !important; position:fixed !important; inset:0 !important;
+    width:100% !important; max-width:100% !important;
+    overflow:hidden !important; overflow:clip !important;
+    pointer-events:none !important; contain:layout paint !important;
+  }
+  #ponete-animaciones-contenidas .ponete-colacho-vuelo {
+    display:flex !important; position:absolute !important; left:0 !important;
+    right:auto !important; top:85px !important;
+    width:max-content !important; max-width:155px !important;
+    white-space:nowrap !important; gap:0 !important;
+    filter:none !important; will-change:transform;
+    animation:ponete-trineo-dentro-ida 20s linear infinite !important;
+  }
+  #ponete-animaciones-contenidas .ponete-colacho-contrario {
+    top:150px !important;
+    animation:ponete-trineo-dentro-vuelta 24s linear infinite !important;
+  }
+  #ponete-animaciones-contenidas .ponete-colacho-renos { font-size:19px !important; letter-spacing:-6px !important; }
+  #ponete-animaciones-contenidas .ponete-colacho-trineo { font-size:22px !important; }
+  #ponete-animaciones-contenidas .ponete-colacho-estrellas { font-size:13px !important; }
+}
+@keyframes ponete-trineo-dentro-ida {
+  from { transform:translateX(calc(100vw - 100%)); }
+  to { transform:translateX(0); }
+}
+@keyframes ponete-trineo-dentro-vuelta {
+  from { transform:translateX(0); }
+  to { transform:translateX(calc(100vw - 100%)); }
+}
+@media (prefers-reduced-motion:reduce) {
+  #ponete-animaciones-contenidas .ponete-colacho-vuelo { animation:none !important; transform:translateX(0) !important; }
+}
+</style>
 </head>
 <body>
 <header class="hero" id="inicio">
@@ -803,7 +841,7 @@ function abrirCategoria(slug){
 /* Regalos decorativos repartidos a lo largo de la pagina. */
 .ponete-regalo-decorativo{position:absolute;z-index:3;pointer-events:none;user-select:none;line-height:1;filter:drop-shadow(0 3px 3px #0006);opacity:.88;animation:ponete-regalo-flotar 4s ease-in-out infinite alternate}
 @keyframes ponete-regalo-flotar{from{transform:translateY(0) rotate(-7deg)}to{transform:translateY(-8px) rotate(7deg)}}
-@media(max-width:650px){.ponete-regalo-decorativo{opacity:.75}}
+@media(max-width:760px){.ponete-regalo-decorativo{opacity:.75;font-size:22px!important;max-width:calc(100vw - 24px);box-sizing:border-box}}
 @media(prefers-reduced-motion:reduce){.ponete-regalo-decorativo{animation:none}}
 </style>
 <script id="ponete-regalos-repartidos-script">
@@ -817,7 +855,7 @@ function abrirCategoria(slug){
       regalo.className='ponete-regalo-decorativo';
       regalo.textContent=['🎁','🎁','🎀','🎁'][i%4];
       regalo.setAttribute('aria-hidden','true');
-      regalo.style.left=(i%2===0 ? (1+(i*7)%5) : (93+(i*3)%5))+'%';
+      if(i%2===0){regalo.style.left='12px';regalo.style.right='auto';}else{regalo.style.right='12px';regalo.style.left='auto';}
       regalo.style.top=(180+i*(Math.max(200,alto-350)/total))+'px';
       regalo.style.fontSize=(22+(i*11)%15)+'px';
       regalo.style.animationDelay=(-(i%7)*.6)+'s';
