@@ -390,7 +390,7 @@ if(db) db.channel('catalogos-live').on('postgres_changes',{event:'*',schema:'pub
 </optgroup>
 <optgroup label="Otras categorías">
 <option value="sueter-equipos">Suéter de equipos</option>
-<option value="nike">Ropa Deportiva</option>
+<option value="ropa-nike">Ropa Deportiva</option>
 
 <option value="tenis">Tenis</option>
 <option value="tacos">Tacos</option>
@@ -511,7 +511,7 @@ document.addEventListener('click', function(e){
 </optgroup>
 <optgroup label="Otras categorías">
 <option value="sueter-equipos">Suéter de equipos</option>
-<option value="nike">Ropa Deportiva</option>
+<option value="ropa-nike">Ropa Deportiva</option>
 
 <option value="tenis">Tenis</option>
 <option value="tacos">Tacos</option>
@@ -539,31 +539,35 @@ async function guardarLinkV7(){
   const categoria=document.getElementById('v7Category').value;
   const enlace=document.getElementById('v7Url').value.trim();
   const status=document.getElementById('linkUploadStatusV7');
-  if(!titulo || !enlace){ status.textContent='Escribe el nombre y pega el enlace.'; return; }
-  try{ new URL(enlace); }catch(e){ status.textContent='El enlace no es válido.'; return; }
+  if(!titulo || !enlace){status.textContent='Escribe el nombre y pega el enlace.';return;}
+  try{const u=new URL(enlace);if(!['https:','http:'].includes(u.protocol))throw Error();}
+  catch(e){status.textContent='El enlace no es válido.';return;}
   status.textContent='Guardando...';
   try{
-    let client = window.supabaseClient;
-    if(!client || !client.from){
-      await new Promise(resolve => setTimeout(resolve, 1200));
-      client = window.supabaseClient;
-    }
-    if(!client || !client.from) throw new Error('No se pudo iniciar la conexión con Supabase');
-    const {data:cats,error:catErr}=await client.from('categorias').select('id,slug').eq('slug',categoria).limit(1);
-    if(catErr) throw catErr;
-    if(!cats || !cats.length) throw new Error('Categoría no encontrada');
-    const {error}=await client.from('catalogos').insert([{
-      categoria_id:cats[0].id,
-      titulo:titulo,
-      enlace:enlace,
-      activo:true
-    }]);
+    if(!db) throw new Error('No hay conexión con Supabase');
+    if(!adminKey) throw new Error('Iniciá sesión como administrador primero.');
+    // Usar el mismo procedimiento seguro que los PDF: no depender de una consulta
+    // directa a categorias ni de permisos RLS para insertar en catalogos.
+    const {error}=await db.rpc('admin_agregar_catalogo_archivo',{
+      p_clave:adminKey,
+      p_categoria_slug:categoria,
+      p_titulo:titulo,
+      p_enlace:enlace,
+      p_storage_path:null
+    });
     if(error) throw error;
     status.textContent='Enlace guardado correctamente.';
-    setTimeout(()=>location.reload(),700);
+    document.getElementById('v7Title').value='';
+    document.getElementById('v7Url').value='';
+    await loadCatalogs();
+    await loadAdmin();
+    setTimeout(cerrarModalV7,900);
   }catch(err){
     console.error(err);
-    status.textContent='No se pudo guardar: '+(err.message||err);
+    const msg=err.message||String(err);
+    status.textContent=/categor[ií]a no encontrada/i.test(msg)
+      ? 'La categoría todavía no existe en Supabase. Hay que registrarla en la tabla categorias antes de guardar.'
+      : 'No se pudo guardar: '+msg;
   }
 }
 document.addEventListener('click',function(e){
