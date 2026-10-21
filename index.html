@@ -268,6 +268,31 @@ footer{background:#070c10;color:#fff;margin-top:8px}.footer-inner{max-width:1200
 body:has(#viewerOverlay.show) #aviso-domingos-fondo{display:none!important}
 @media(max-width:650px){#viewerOverlay{padding:5px!important}#viewerOverlay .viewer{width:100%!important;max-height:calc(100dvh - 10px)!important;min-height:calc(100dvh - 10px)!important;padding:16px 12px!important}#viewerOverlay .catalog-item{gap:9px!important}#viewerOverlay .catalog-item a{padding:9px 11px!important}}
 </style>
+<style id="ajuste-pantalla-movil-ancho-completo">
+/* Ajuste responsive: elimina desbordamientos y centra el contenido en celulares. */
+@media (max-width: 680px) {
+  html, body { width:100%; max-width:100%; margin:0; padding:0; overflow-x:clip; }
+  body > header, body > main, body > section, body > footer,
+  .hero, .catalogs, .catalog-grid, .cards, .footer-inner, .nav,
+  .admin, .admin-layout, .admin-main, .admin-side {
+    max-width:100%; min-width:0;
+  }
+  .nav { width:100%; margin:0 auto; grid-template-columns:minmax(0,1fr) auto; }
+  .hero-copy, .catalogs { width:100%; margin-left:auto; margin-right:auto; }
+  .cards, .catalog-grid { width:100%; grid-template-columns:repeat(2,minmax(0,1fr)); justify-content:center; }
+  .cards > *, .catalog-grid > * { min-width:0; max-width:100%; }
+  .card { width:100%; min-width:0; padding:12px 8px; }
+  .card img, .catalog-grid img { max-width:100%; height:auto; }
+  .pdf-btn { min-width:0; max-width:100%; }
+  .admin-layout { width:100%; grid-template-columns:minmax(0,1fr); }
+  .admin-main, .admin-side { width:100%; min-width:0; box-sizing:border-box; }
+  .admin-head { flex-wrap:wrap; }
+  .admin-form, .admin-form.show { width:100%; min-width:0; }
+  .admin-form input, .admin-form select { width:100%; min-width:0; }
+  .table { max-width:100%; overflow-x:auto; }
+  .wa-strip { max-width:100%; flex-wrap:wrap; }
+}
+</style>
 </head>
 <body>
 <header class="hero" id="inicio">
