@@ -482,10 +482,15 @@ const publicGroups=[
  {slug:'sueter',name:'SUÉTER',img:'data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22180%22%20height%3D%22150%22%20viewBox%3D%220%200%20180%20150%22%3E%3Crect%20width%3D%22180%22%20height%3D%22150%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M55%2040%20L78%2027%20L102%2027%20L125%2040%20L149%2066%20L132%2082%20L119%2069%20L119%20125%20L61%20125%20L61%2069%20L48%2082%20L31%2066%20Z%22%20fill%3D%22%230f5132%22%20stroke%3D%22%230a2f1f%22%20stroke-width%3D%224%22/%3E%3Cpath%20d%3D%22M78%2027%20Q90%2043%20102%2027%22%20fill%3D%22none%22%20stroke%3D%22white%22%20stroke-width%3D%225%22/%3E%3Cpath%20d%3D%22M61%2080%20H119%22%20stroke%3D%22%231fc56b%22%20stroke-width%3D%226%22/%3E%3C/svg%3E',children:['sueter']},
 ];
 const adminCategories=[
- ['hombre-sin-mangas','Hombre · Ropa de entrenamiento sin mangas'],['hombre-pantalonetas','Hombre · Pantalonetas'],['hombre-calentamiento','Hombre · Camisas de calentamiento'],['hombre-polo','Hombre · Estilo Polo'],['hombre-buzos','Hombre · Buzos de hombre'],
+ ['hombre-player','CAMISAS PLAYER · categoría independiente'],
+ ['hombre-retro','CAMISAS RETRO · categoría independiente'],
+ ['hombre-sin-mangas','Hombre · Ropa de entrenamiento sin mangas'],
+ ['hombre-pantalonetas','Hombre · Pantalonetas'],
+ ['hombre-calentamiento','Hombre · Camisas de calentamiento'],
+ ['hombre-polo','Hombre · Estilo Polo'],
+ ['hombre-buzos','Hombre · Buzos de hombre'],
  ['nino-actuales','Niño · Uniformes Actuales'],['nino-retro','Niño · Uniformes Retro'],['nino-buzos','Niño · Buzos'],
- ['hombre-player','CAMISAS PLAYER (independiente)'],['hombre-retro','CAMISAS RETRO (independiente)'],
- ['nba','NBA'], ['sueter','Suéter de equipos'],['tenis','Tenis'],['tacos','Tacos'],['ropa-nike','Ropa Deportiva']
+ ['nba','NBA'],['sueter','Suéter de equipos'],['tenis','Tenis'],['tacos','Tacos'],['ropa-nike','Ropa Deportiva']
 ];
 const qs=s=>document.querySelector(s);let catalogs=[];let adminKey='';
 let db=null; try{db=window.supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_KEY)}catch(e){console.error('Supabase no disponible',e)}
