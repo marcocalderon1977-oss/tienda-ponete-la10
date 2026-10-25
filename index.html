@@ -395,6 +395,11 @@ body:has(#viewerOverlay.show) #aviso-domingos-fondo{display:none!important}
   body #adminOpen.admin-open{display:block!important;visibility:visible!important;opacity:1!important;position:fixed!important;right:12px!important;bottom:12px!important;z-index:2147483000!important;pointer-events:auto!important;max-width:calc(100vw - 24px)!important}
   body:has(#adminPanel.show) #adminOpen.admin-open,body:has(#loginOverlay.show) #adminOpen.admin-open{display:none!important}
 }
+
+/* Boton Administrador al final de la pagina, sin tapar WhatsApp ni catalogos */
+body #adminOpen.admin-open{position:static!important;display:block!important;width:max-content;max-width:calc(100% - 32px);margin:18px auto 24px!important;right:auto!important;bottom:auto!important;z-index:auto!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}
+@media(max-width:760px){body #adminOpen.admin-open{position:static!important;right:auto!important;bottom:auto!important;z-index:auto!important;display:block!important;margin:18px auto 24px!important;max-width:calc(100% - 32px)!important}}
+body:has(#adminPanel.show) #adminOpen.admin-open,body:has(#loginOverlay.show) #adminOpen.admin-open{display:none!important}
 </style></head>
 <body>
 <header class="hero" id="inicio">
