@@ -388,26 +388,14 @@ body:has(#viewerOverlay.show) #aviso-domingos-fondo{display:none!important}
 .wa-flotante-escribenos svg{width:29px;height:29px;flex:none}
 @media(max-width:620px){.wa-flotante-escribenos{right:12px;bottom:14px;padding:9px 13px 9px 10px;font-size:13px}.wa-flotante-escribenos svg{width:26px;height:26px}}
 </style>
-<style id="catalogos-tamano-mayor-2026">
-/* Tarjetas de catalogos ligeramente mas grandes, sin modificar el administrador. */
-.catalogs .cards{max-width:1300px!important;column-gap:16px!important;row-gap:30px!important}
-.catalogs .cards .card{min-height:218px!important;padding:15px 12px 17px!important;border-radius:16px!important}
-.catalogs .cards .card-img{height:91px!important;margin-bottom:6px!important}
-.catalogs .cards .card-img img{max-width:103px!important;max-height:88px!important}
-.catalogs .cards .card h3{font-size:16px!important;margin:6px 0!important}
-.catalogs .cards .card p{font-size:12px!important;margin-bottom:11px!important}
-.catalogs .cards .pdf-btn{font-size:13px!important;min-width:118px!important;padding:10px 13px!important}
-@media(max-width:620px){
-.catalogs .cards{column-gap:10px!important;row-gap:24px!important}
-.catalogs .cards .card{min-height:185px!important;padding:11px 7px 13px!important}
-.catalogs .cards .card-img{height:73px!important}
-.catalogs .cards .card-img img{max-height:70px!important;max-width:83px!important}
-.catalogs .cards .card h3{font-size:14px!important}
-.catalogs .cards .card p{font-size:11px!important;margin-bottom:8px!important}
-.catalogs .cards .pdf-btn{font-size:11px!important;min-width:0!important;padding:9px 8px!important}
+<style id="fix-admin-cierre-movil">
+/* El panel de enlaces solo se muestra dentro de una sesión administrativa activa. */
+#adminLinkManager{display:none}
+@media(max-width:760px){
+  body #adminOpen.admin-open{display:block!important;visibility:visible!important;opacity:1!important;position:fixed!important;right:12px!important;bottom:12px!important;z-index:2147483000!important;pointer-events:auto!important;max-width:calc(100vw - 24px)!important}
+  body:has(#adminPanel.show) #adminOpen.admin-open,body:has(#loginOverlay.show) #adminOpen.admin-open{display:none!important}
 }
-</style>
-</head>
+</style></head>
 <body>
 <header class="hero" id="inicio">
 <div aria-hidden="true" class="navidad-guirnalda"></div>
@@ -530,7 +518,7 @@ async function uploadCatalog(e){e.preventDefault();const file=qs('#catalogFile')
 function resetSave(){qs('#saveButton').disabled=false;qs('#saveButton').textContent='Subir y guardar catálogo'}
 async function removeCatalog(id,path){if(!confirm('¿Eliminar este catálogo?'))return;const {error}=await db.rpc('admin_borrar_catalogo_archivo',{p_clave:adminKey,p_catalogo_id:id});if(error){alert(error.message);return}if(path)await db.storage.from('catalogos').remove([decodeURIComponent(path)]);await loadCatalogs();await loadAdmin()}
 async function renameCatalog(id,t,u){const title=prompt('Nombre del catálogo',decodeURIComponent(t));if(title===null)return;const {error}=await db.rpc('admin_modificar_catalogo',{p_clave:adminKey,p_catalogo_id:id,p_titulo:title,p_enlace:decodeURIComponent(u)});if(error){alert(error.message);return}await loadCatalogs();await loadAdmin()}
-function logout(){adminKey='';qs('#adminPanel').classList.remove('show');qs('#adminPassword').value=''}
+function logout(){adminKey='';qs('#adminPanel').classList.remove('show');qs('#loginOverlay').classList.remove('show');const links=document.getElementById('adminLinkManager');if(links)links.style.display='none';qs('#adminPassword').value=''}
 qs('#adminOpen').onclick=()=>{qs('#loginOverlay').classList.add('show');qs('#adminPassword').focus()};qs('#loginButton').onclick=tryLogin;qs('#adminPassword').onkeydown=e=>{if(e.key==='Enter')tryLogin()};qs('#loginCancel').onclick=()=>qs('#loginOverlay').classList.remove('show');qs('#viewerClose').onclick=()=>qs('#viewerOverlay').classList.remove('show');qs('#openUpload').onclick=qs('#sideUpload').onclick=()=>qs('#uploadForm').classList.toggle('show');qs('#uploadForm').onsubmit=uploadCatalog;qs('#sideLogout').onclick=qs('#topLogout').onclick=logout;
 renderCards();renderCategorySelect();loadCatalogs();
 if(db) db.channel('catalogos-live').on('postgres_changes',{event:'*',schema:'public',table:'catalogos'},async()=>{await loadCatalogs();if(adminKey)await loadAdmin()}).subscribe();
@@ -579,6 +567,7 @@ if(db) db.channel('catalogos-live').on('postgres_changes',{event:'*',schema:'pub
 const LINK_TABLE = 'catalogos';
 
 function admin_mostrar_panel_links(){
+  if(!adminKey)return;
   const panel = document.getElementById('adminLinkManager');
   if(panel) panel.style.display = 'block';
   admin_cargar_links();
